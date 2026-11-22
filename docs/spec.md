@@ -39,14 +39,21 @@ Status: trwa wywiad; implementacja niezatwierdzona.
 - Cały interfejs programu i instalatora wyłącznie po angielsku. Dokumentacja robocza pozostaje po polsku.
 - Potwierdzone ładowanie: zielony procent i dymek Charging — 42% (wartość przykładowa). Bez animacji; ikony Zzz, odłączenia i błędu również statyczne.
 - Domyślnie brak zapisu logów. Menu Copy diagnostics kopiuje wersję programu, identyfikator odbiornika, stan i ostatni błąd; bez numerów seryjnych i danych osobowych. Brak wysyłania danych.
-- Osobny debug mode automatycznie zapisuje logi w jednym miejscu. Jest świadomym wyjątkiem od braku regularnych zapisów w trybie normalnym. Szczegóły trybu wymagają uzgodnienia.
+- Osobny debug mode automatycznie zapisuje logi w jednym miejscu. Jest świadomym wyjątkiem od braku regularnych zapisów w trybie normalnym. Szczegóły trybu zatwierdzono w siódmej rundzie.
 - Pełne odinstalowanie usuwa autostart, ustawienia, zapamiętane ostrzeżenie i dane programu. Aktualizacja MSI zachowuje ustawienia.
+
+### Siódma runda — zatwierdzone
+
+- Menu zawiera przełącznik Debug mode oraz Open logs folder. Domyślnie debug wyłączony; po włączeniu ustawienie jest pamiętane po restarcie, aż użytkownik je wyłączy.
+- Wspólny katalog logów: %LOCALAPPDATA%\Open Battery\Logs. Rotacja: maksymalnie pięć plików po 1 MB; najstarsze automatycznie zastępowane.
+- Logi zawierają czas, próby odczytu, wyniki i błędy dotyczące myszy. Bez śledzenia ruchów, kliknięć, numerów seryjnych i danych innych urządzeń.
+- Podczas pracy na baterii procent biały lub czarny zgodnie z motywem Windows; przy 20% lub mniej pomarańczowy. Zielony jest zarezerwowany dla potwierdzonego ładowania.
 
 ## Otwarte decyzje
 
 - Docelowy wygląd wskaźnika: późniejszy etap; obecnie sama liczba bez znaku % i rysunku baterii.
 - Weryfikacja protokołu baterii i współpraca z oprogramowaniem producenta.
-- Technologia i licencja; limity, lokalizacja i czas działania debug mode; kolory procentu podczas pracy na baterii.
+- Technologia i licencja; współpraca z aplikacją producenta, ostrzeganie podczas ładowania oraz końcowa akceptacja specyfikacji.
 
 ## Fakty i ograniczenia
 
