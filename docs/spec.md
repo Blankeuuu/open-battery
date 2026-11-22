@@ -1,6 +1,6 @@
-# Specyfikacja Open Battery — do końcowego przeglądu
+# Specyfikacja Open Battery — zatwierdzona
 
-Status: decyzje produktowe zatwierdzane w rozmowie; pełna specyfikacja oczekuje na końcową akceptację. Implementacja nie została rozpoczęta.
+Status: pełna specyfikacja zatwierdzona przez użytkownika 2026-11-22. Implementacja nie została rozpoczęta; wymaga osobnego polecenia użytkownika.
 
 ## Cel i zakres
 
@@ -74,7 +74,7 @@ MSI instaluje dla aktualnego użytkownika, bez administratora i usługi systemow
 
 ## Kolejność dalszych prac i granica zgody
 
-1. Końcowy przegląd i wyraźna akceptacja specyfikacji przez użytkownika.
+1. Końcowy przegląd i akceptacja specyfikacji: zakończone 2026-11-22. Oczekiwanie na osobne polecenie rozpoczęcia prac.
 2. Po osobnym poleceniu rozpoczęcia: weryfikacja rzeczywistego odczytu baterii tego egzemplarza.
 3. Dopiero po potwierdzeniu odczytu: budowa wskaźnika i MSI oraz testy funkcjonalne i zasobów.
 
