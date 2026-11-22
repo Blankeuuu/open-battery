@@ -11,9 +11,9 @@ Status: trwa wywiad; implementacja niezatwierdzona.
 
 - W pierwszej wersji wskaźnik pokazuje samą liczbę, np. 87, bez znaku % i rysunku baterii. Docelowa estetyka będzie dopracowana później. Po najechaniu: nazwa myszy, procent i czas ostatniego odczytu.
 - Ostrzeżenie przy poziomie 20% lub mniej, raz; ponowne uzbrojenie po odczycie powyżej 25%.
-- Domyślny start z Windows. Menu: Odśwież teraz, Uruchamiaj z Windows, Zakończ; bez osobnego okna ustawień na początek.
+- Domyślny start z Windows. Menu: Refresh now, Start with Windows, Exit; bez osobnego okna ustawień na początek.
 - Przy braku wiarygodnego stanu ładowania pokazujemy wyłącznie procent. Wzrost procentu nie oznacza automatycznie ładowania.
-- Nieaktywna mysz przy podłączonym odbiorniku: kreskówkowa ikona Zzz zamiast procentu; obejmuje sen i wyłączenie, jeśli protokół ich nie rozróżnia. Dymek: Mysz nieaktywna, ostatni procent i czas odczytu. Błąd komunikacji nie oznacza automatycznie snu. Techniczne warunki rozpoznania stanu wymagają weryfikacji protokołu.
+- Nieaktywna mysz przy podłączonym odbiorniku: kreskówkowa ikona Zzz zamiast procentu; obejmuje sen i wyłączenie, jeśli protokół ich nie rozróżnia. Dymek: Mouse inactive, ostatni procent i czas odczytu. Błąd komunikacji nie oznacza automatycznie snu. Techniczne warunki rozpoznania stanu wymagają weryfikacji protokołu.
 
 ### Trzecia runda — zatwierdzone
 
@@ -23,7 +23,7 @@ Status: trwa wywiad; implementacja niezatwierdzona.
 
 ### Czwarta runda — zatwierdzone
 
-- Odłączenie odbiornika: szara ikona przekreślonej myszy; dymek Odbiornik odłączony.
+- Odłączenie odbiornika: szara ikona przekreślonej myszy; dymek Receiver disconnected.
 - Akceptowane opóźnienie powrotu procentu po wybudzeniu: do 60 sekund. Dostępne ręczne Odśwież teraz. Szybszy powrót po zdarzeniu urządzenia jest dopuszczony, jeśli nie wymaga częstszego odpytywania.
 - Dystrybucja przez instalator MSI. Wariant przenośny nie jest planowany w pierwszej wersji.
 
@@ -31,14 +31,22 @@ Status: trwa wywiad; implementacja niezatwierdzona.
 
 - MSI instaluje dla aktualnego użytkownika, bez uprawnień administratora i bez usługi systemowej. Autostart po zalogowaniu użytkownika.
 - Aktualizacja ręczna przez nowszy MSI, z zachowaniem ustawień. Program nie sprawdza aktualizacji przez sieć.
-- Błąd odczytu przy obecnym odbiorniku: szary wykrzyknik, opis Nie udało się odczytać baterii, ostatni znany procent i czas odczytu. Przed pierwszym poprawnym odczytem opis Brak odczytu, bez wymyślonej wartości.
+- Błąd odczytu przy obecnym odbiorniku: szary wykrzyknik, opis Could not read battery, ostatni znany procent i czas odczytu. Przed pierwszym poprawnym odczytem opis No reading, bez wymyślonej wartości.
 - Pierwsza wersja wspiera Windows 11 x64.
+
+### Szósta runda — zatwierdzone
+
+- Cały interfejs programu i instalatora wyłącznie po angielsku. Dokumentacja robocza pozostaje po polsku.
+- Potwierdzone ładowanie: zielony procent i dymek Charging — 42% (wartość przykładowa). Bez animacji; ikony Zzz, odłączenia i błędu również statyczne.
+- Domyślnie brak zapisu logów. Menu Copy diagnostics kopiuje wersję programu, identyfikator odbiornika, stan i ostatni błąd; bez numerów seryjnych i danych osobowych. Brak wysyłania danych.
+- Osobny debug mode automatycznie zapisuje logi w jednym miejscu. Jest świadomym wyjątkiem od braku regularnych zapisów w trybie normalnym. Szczegóły trybu wymagają uzgodnienia.
+- Pełne odinstalowanie usuwa autostart, ustawienia, zapamiętane ostrzeżenie i dane programu. Aktualizacja MSI zachowuje ustawienia.
 
 ## Otwarte decyzje
 
 - Docelowy wygląd wskaźnika: późniejszy etap; obecnie sama liczba bez znaku % i rysunku baterii.
 - Weryfikacja protokołu baterii i współpraca z oprogramowaniem producenta.
-- Technologia i licencja; wygląd ładowania, polityka diagnostyki i odinstalowania.
+- Technologia i licencja; limity, lokalizacja i czas działania debug mode; kolory procentu podczas pracy na baterii.
 
 ## Fakty i ograniczenia
 
