@@ -1,68 +1,96 @@
-# Specyfikacja robocza Open Battery
+# Specyfikacja Open Battery — do końcowego przeglądu
 
-Status: trwa wywiad; implementacja niezatwierdzona.
+Status: decyzje produktowe zatwierdzane w rozmowie; pełna specyfikacja oczekuje na końcową akceptację. Implementacja nie została rozpoczęta.
 
-## Decyzje zatwierdzone
+## Cel i zakres
 
-2026-11-22: użytkownik zaakceptował zakres opisany w README: zasobnik z procentem, AJ179 Pro przez 3151:402D, normalny odczyt co 60 sekund, stan ładowania i jedno ostrzeżenie, minimalny narzut bez stałego okna i sieci. Repozytorium publiczne, początkowo dokumentacja.
+Minimalny wskaźnik baterii AJAZZ AJ179 Pro przez odbiornik 2.4 GHz `3151:402D` dla Windows 11 x64. Pierwsza wersja obsługuje ten egzemplarz; odczyt baterii pozostaje niezweryfikowany. Interfejs programu i instalatora wyłącznie po angielsku. Dokumentacja robocza po polsku. Licencja MIT.
 
+Bez stałego okna, usługi systemowej i aktywności sieciowej programu. Bez historii baterii, wykresów i prognoz czasu pracy. Docelowa estetyka wskaźnika będzie rozwijana później.
 
-### Druga runda — zatwierdzone
+## Wskaźnik i stany
 
-- W pierwszej wersji wskaźnik pokazuje samą liczbę, np. 87, bez znaku % i rysunku baterii. Docelowa estetyka będzie dopracowana później. Po najechaniu: nazwa myszy, procent i czas ostatniego odczytu.
-- Ostrzeżenie przy poziomie 20% lub mniej, raz; ponowne uzbrojenie po odczycie powyżej 25%.
-- Domyślny start z Windows. Menu: Refresh now, Start with Windows, Exit; bez osobnego okna ustawień na początek.
-- Przy braku wiarygodnego stanu ładowania pokazujemy wyłącznie procent. Wzrost procentu nie oznacza automatycznie ładowania.
-- Nieaktywna mysz przy podłączonym odbiorniku: kreskówkowa ikona Zzz zamiast procentu; obejmuje sen i wyłączenie, jeśli protokół ich nie rozróżnia. Dymek: Mouse inactive, ostatni procent i czas odczytu. Błąd komunikacji nie oznacza automatycznie snu. Techniczne warunki rozpoznania stanu wymagają weryfikacji protokołu.
+Ikona w zasobniku systemowym obok zegara; na początek sama liczba, bez znaku %. Wszystkie ikony statyczne.
 
-### Trzecia runda — zatwierdzone
+| Stan | Wskaźnik | Dymek |
+| --- | --- | --- |
+| Poprawny odczyt, praca na baterii | Procent, biały/czarny według motywu; pomarańczowy przy ≤20% | Nazwa myszy, procent, czas odczytu |
+| Potwierdzone ładowanie | Zielony procent | Charging — 42% (wartość przykładowa), czas odczytu |
+| Nieaktywna mysz, odbiornik obecny | Kreskówkowe Zzz zamiast procentu | Mouse inactive, ostatni procent i czas odczytu, jeśli dostępne |
+| Odbiornik odłączony | Szara przekreślona mysz | Receiver disconnected |
+| Błąd odczytu, odbiornik obecny | Szary wykrzyknik | Could not read battery, ostatni procent i czas odczytu, jeśli dostępne |
+| Brak pierwszego poprawnego odczytu | Szary wykrzyknik | No reading |
 
-- Cel zasobów: do 10 MB pamięci prywatnej i średnio poniżej 0,1% CPU podczas 10 minut bezczynności na komputerze użytkownika. Bez regularnych zapisów na dysk. Są to kryteria do pomiaru, a nie osiągnięte wyniki.
-- Stan wysłanego ostrzeżenia jest pamiętany po restarcie. Ponowne uzbrojenie dopiero po wiarygodnym odczycie powyżej 25%; mały zapis przy zmianie stanu jest dopuszczony.
-- Po zatwierdzeniu pełnej specyfikacji pierwszym etapem będzie weryfikacja rzeczywistego odczytu baterii AJ179 Pro. Budowa wskaźnika nastąpi po potwierdzeniu odczytu. Żadnego etapu implementacji jeszcze nie rozpoczęto.
+Zzz może obejmować sen i wyłączenie myszy, jeśli protokół ich nie rozróżnia. Błąd komunikacji nie jest automatycznie snem. Techniczne rozpoznawanie stanów wymaga sprawdzenia protokołu. Brak wiarygodnej flagi ładowania oznacza pokazywanie samego procentu, bez oznaczania ładowania; sam wzrost procentu nie wystarcza.
 
-### Czwarta runda — zatwierdzone
+## Odczyt i współpraca z urządzeniem
 
-- Odłączenie odbiornika: szara ikona przekreślonej myszy; dymek Receiver disconnected.
-- Akceptowane opóźnienie powrotu procentu po wybudzeniu: do 60 sekund. Dostępne ręczne Odśwież teraz. Szybszy powrót po zdarzeniu urządzenia jest dopuszczony, jeśli nie wymaga częstszego odpytywania.
-- Dystrybucja przez instalator MSI. Wariant przenośny nie jest planowany w pierwszej wersji.
+- Normalne odpytywanie co 60 sekund; ręczne Refresh now.
+- Akceptowane opóźnienie powrotu procentu po wybudzeniu do 60 sekund.
+- Zdarzenie urządzenia może przyspieszyć powrót bez częstszego odpytywania.
+- Jeśli aplikacja AJAZZ blokuje odbiornik: stan błędu i próba co 60 sekund, bez zamykania innych programów.
+- Możliwy konflikt można opisać w diagnostyce; pewna przyczyna tylko przy wiarygodnym rozpoznaniu.
+- Nie pokazujemy zmyślonych wartości. Ostatni odczyt przy błędzie lub nieaktywności jest opisany jako historyczny.
 
-### Piąta runda — zatwierdzone
+## Ostrzeżenie o niskiej baterii
 
-- MSI instaluje dla aktualnego użytkownika, bez uprawnień administratora i bez usługi systemowej. Autostart po zalogowaniu użytkownika.
-- Aktualizacja ręczna przez nowszy MSI, z zachowaniem ustawień. Program nie sprawdza aktualizacji przez sieć.
-- Błąd odczytu przy obecnym odbiorniku: szary wykrzyknik, opis Could not read battery, ostatni znany procent i czas odczytu. Przed pierwszym poprawnym odczytem opis No reading, bez wymyślonej wartości.
-- Pierwsza wersja wspiera Windows 11 x64.
+- Jedno ostrzeżenie przy ≤20%, bez powtarzania po wybudzeniu lub restarcie.
+- Ponowne uzbrojenie po poprawnym odczycie >25%.
+- Stan ostrzeżenia przechowywany między uruchomieniami; mały zapis przy zmianie stanu dopuszczony.
+- Przy potwierdzonym ładowaniu brak ostrzeżenia.
+- Po ustaniu ładowania przy ≤20% ostrzeżenie może zostać wysłane, jeśli nie było go w tym cyklu.
 
-### Szósta runda — zatwierdzone
+## Menu i ustawienia
 
-- Cały interfejs programu i instalatora wyłącznie po angielsku. Dokumentacja robocza pozostaje po polsku.
-- Potwierdzone ładowanie: zielony procent i dymek Charging — 42% (wartość przykładowa). Bez animacji; ikony Zzz, odłączenia i błędu również statyczne.
-- Domyślnie brak zapisu logów. Menu Copy diagnostics kopiuje wersję programu, identyfikator odbiornika, stan i ostatni błąd; bez numerów seryjnych i danych osobowych. Brak wysyłania danych.
-- Osobny debug mode automatycznie zapisuje logi w jednym miejscu. Jest świadomym wyjątkiem od braku regularnych zapisów w trybie normalnym. Szczegóły trybu zatwierdzono w siódmej rundzie.
-- Pełne odinstalowanie usuwa autostart, ustawienia, zapamiętane ostrzeżenie i dane programu. Aktualizacja MSI zachowuje ustawienia.
+- Refresh now
+- Start with Windows — domyślnie włączone, start po zalogowaniu
+- Copy diagnostics
+- Debug mode — domyślnie wyłączone
+- Open logs folder
+- Exit
 
-### Siódma runda — zatwierdzone
+Bez osobnego okna ustawień na początek.
 
-- Menu zawiera przełącznik Debug mode oraz Open logs folder. Domyślnie debug wyłączony; po włączeniu ustawienie jest pamiętane po restarcie, aż użytkownik je wyłączy.
-- Wspólny katalog logów: %LOCALAPPDATA%\Open Battery\Logs. Rotacja: maksymalnie pięć plików po 1 MB; najstarsze automatycznie zastępowane.
-- Logi zawierają czas, próby odczytu, wyniki i błędy dotyczące myszy. Bez śledzenia ruchów, kliknięć, numerów seryjnych i danych innych urządzeń.
-- Podczas pracy na baterii procent biały lub czarny zgodnie z motywem Windows; przy 20% lub mniej pomarańczowy. Zielony jest zarezerwowany dla potwierdzonego ładowania.
+## Diagnostyka
 
-### Ósma runda — zatwierdzone
+Domyślnie brak zapisu logów na dysku. Copy diagnostics kopiuje wersję programu, identyfikator odbiornika, stan i ostatni błąd; bez numerów seryjnych i danych osobowych. Nic nie jest wysyłane.
 
-- Przy potwierdzonym ładowaniu brak ostrzeżenia o niskiej baterii. Po ustaniu ładowania przy poziomie 20% lub mniej ostrzeżenie może zostać wysłane, jeśli nie było go w tym cyklu. Reguła ponownego uzbrojenia powyżej 25% pozostaje bez zmian.
-- Gdy aplikacja AJAZZ blokuje odbiornik: stan błędu, ponawianie co 60 sekund, bez zamykania innych programów. Diagnostyka może wskazać możliwy konflikt; pewna przyczyna tylko przy wiarygodnym rozpoznaniu.
-- Licencja projektu MIT; informacja copyright: Blankeuuu, 2026.
+Debug mode automatycznie zapisuje czas, próby odczytu, wyniki i błędy dotyczące myszy do `%LOCALAPPDATA%\Open Battery\Logs`. Ustawienie jest pamiętane po restarcie aż do wyłączenia. Rotacja maksymalnie 5 plików po 1 MB; najstarsze zastępowane. Bez śledzenia ruchów, kliknięć, numerów seryjnych i danych innych urządzeń.
 
-## Otwarte decyzje
+## Budżet zasobów
 
-- Docelowy wygląd wskaźnika: późniejszy etap; obecnie sama liczba bez znaku % i rysunku baterii.
-- Weryfikacja protokołu baterii i współpraca z oprogramowaniem producenta.
-- Wybór technologii oraz końcowa akceptacja specyfikacji.
+- Cel: do 10 MB pamięci prywatnej.
+- Cel: średnio <0,1% CPU podczas 10 minut bezczynności na komputerze użytkownika.
+- Bez regularnych zapisów w normalnym trybie; dopuszczone zapisy ustawień i stanu ostrzeżenia przy ich zmianie.
+- Debug mode jest świadomym wyjątkiem dopuszczającym zapis logów.
 
-## Fakty i ograniczenia
+To kryteria do pomiaru, nie osiągnięte wyniki. Szczegółową procedurę pomiaru trzeba opisać przed raportowaniem wyników.
 
-W poprzedniej diagnostyce Windows wykrywał odbiornik 3151:402D jako sprawny. Halo Battery 1.17.0 wyklucza ten identyfikator z obsługi AJAZZ z powodu niepotwierdzonej wymiany odczytu baterii. Nie wykonano testu protokołu dla Open Battery. Nazwa modelu przypisana do wspólnego PID w cudzym projekcie nie rozstrzyga modelu myszy użytkownika.
+## Technologia i instalacja
 
-Źródło: https://github.com/HeyOkay/HaloBattery/blob/main/docs/protocols.md
+Zatwierdzone: C++ z bezpośrednim Win32 i systemowym HID API; instalator MSI przez WiX. Wybrano małą liczbę warstw pod cel niskiego zużycia zasobów. Wersje narzędzi i warunki użycia WiX należy sprawdzić przed instalacją; narzędzi C++/WiX jeszcze nie instalowano.
+
+MSI instaluje dla aktualnego użytkownika, bez administratora i usługi systemowej. Aktualizacja ręczna nowszym MSI zachowuje ustawienia; program nie sprawdza aktualizacji przez sieć. Pełne odinstalowanie usuwa autostart, ustawienia, stan ostrzeżenia i dane programu, w tym logi. Brak wariantu portable w pierwszej wersji.
+
+## Kolejność dalszych prac i granica zgody
+
+1. Końcowy przegląd i wyraźna akceptacja specyfikacji przez użytkownika.
+2. Po osobnym poleceniu rozpoczęcia: weryfikacja rzeczywistego odczytu baterii tego egzemplarza.
+3. Dopiero po potwierdzeniu odczytu: budowa wskaźnika i MSI oraz testy funkcjonalne i zasobów.
+
+Akceptacja poszczególnych decyzji nie jest poleceniem rozpoczęcia implementacji. Szczegóły protokołu pozostają do zbadania. Docelowa estetyka została świadomie odłożona.
+
+## Podstawa i ograniczenia
+
+W poprzedniej diagnostyce Windows wykrywał odbiornik 3151:402D jako sprawny. Halo Battery 1.17.0 wykluczał ten identyfikator z obsługi AJAZZ ze względu na brak potwierdzonej wymiany baterii. Sprawne HID nie potwierdza telemetrii; nazwa modelu przypisana do współdzielonego PID w innym projekcie nie rozstrzyga modelu użytkownika.
+
+Źródła:
+- [Halo Battery — protokoły](https://github.com/HeyOkay/HaloBattery/blob/main/docs/protocols.md)
+- [Ikona zasobnika Win32](https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shell_notifyiconw)
+- [Windows HID API](https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/hid-api)
+- [MSI installation context](https://learn.microsoft.com/en-us/windows/win32/msi/installation-context)
+- [WiX Package](https://docs.firegiant.com/wix/schema/wxs/package/)
+
+## Znany efekt sprawdzania środowiska
+
+Podczas badania narzędzi polecenie `dotnet tool list --global` uruchomiło inicjalizację .NET, która zgłosiła instalację developerskiego certyfikatu HTTPS. Nie uruchomiono nadawania zaufania. Bez wcześniejszej inwentaryzacji nie potwierdzono, czy certyfikat był nowy. Nie jest to zależność Open Battery; implementacji ani buildów nie uruchamiano.
