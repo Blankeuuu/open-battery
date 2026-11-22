@@ -27,12 +27,18 @@ Status: trwa wywiad; implementacja niezatwierdzona.
 - Akceptowane opóźnienie powrotu procentu po wybudzeniu: do 60 sekund. Dostępne ręczne Odśwież teraz. Szybszy powrót po zdarzeniu urządzenia jest dopuszczony, jeśli nie wymaga częstszego odpytywania.
 - Dystrybucja przez instalator MSI. Wariant przenośny nie jest planowany w pierwszej wersji.
 
+### Piąta runda — zatwierdzone
+
+- MSI instaluje dla aktualnego użytkownika, bez uprawnień administratora i bez usługi systemowej. Autostart po zalogowaniu użytkownika.
+- Aktualizacja ręczna przez nowszy MSI, z zachowaniem ustawień. Program nie sprawdza aktualizacji przez sieć.
+- Błąd odczytu przy obecnym odbiorniku: szary wykrzyknik, opis Nie udało się odczytać baterii, ostatni znany procent i czas odczytu. Przed pierwszym poprawnym odczytem opis Brak odczytu, bez wymyślonej wartości.
+- Pierwsza wersja wspiera Windows 11 x64.
+
 ## Otwarte decyzje
 
 - Docelowy wygląd wskaźnika: późniejszy etap; obecnie sama liczba bez znaku % i rysunku baterii.
-- Prezentacja błędu komunikacji i pierwszego uruchomienia bez poprawnego odczytu.
 - Weryfikacja protokołu baterii i współpraca z oprogramowaniem producenta.
-- Technologia, zakres instalacji MSI, aktualizacje, wspierane wersje Windows i licencja.
+- Technologia i licencja; wygląd ładowania, polityka diagnostyki i odinstalowania.
 
 ## Fakty i ograniczenia
 
