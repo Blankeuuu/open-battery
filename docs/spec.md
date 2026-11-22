@@ -13,7 +13,7 @@ Status: trwa wywiad; implementacja niezatwierdzona.
 - Ostrzeżenie przy poziomie 20% lub mniej, raz; ponowne uzbrojenie po odczycie powyżej 25%.
 - Domyślny start z Windows. Menu: Odśwież teraz, Uruchamiaj z Windows, Zakończ; bez osobnego okna ustawień na początek.
 - Przy braku wiarygodnego stanu ładowania pokazujemy wyłącznie procent. Wzrost procentu nie oznacza automatycznie ładowania.
-- Uśpienie myszy ma być prezentowane ikoną Zzz w kreskówkowym stylu, zamiast procentu. Warunki rozpoznawania tego stanu i odróżnienia od wyłączenia lub braku odpowiedzi pozostają do ustalenia po sprawdzeniu protokołu.
+- Nieaktywna mysz przy podłączonym odbiorniku: kreskówkowa ikona Zzz zamiast procentu; obejmuje sen i wyłączenie, jeśli protokół ich nie rozróżnia. Dymek: Mysz nieaktywna, ostatni procent i czas odczytu. Błąd komunikacji nie oznacza automatycznie snu. Techniczne warunki rozpoznania stanu wymagają weryfikacji protokołu.
 
 ### Trzecia runda — zatwierdzone
 
@@ -21,12 +21,18 @@ Status: trwa wywiad; implementacja niezatwierdzona.
 - Stan wysłanego ostrzeżenia jest pamiętany po restarcie. Ponowne uzbrojenie dopiero po wiarygodnym odczycie powyżej 25%; mały zapis przy zmianie stanu jest dopuszczony.
 - Po zatwierdzeniu pełnej specyfikacji pierwszym etapem będzie weryfikacja rzeczywistego odczytu baterii AJ179 Pro. Budowa wskaźnika nastąpi po potwierdzeniu odczytu. Żadnego etapu implementacji jeszcze nie rozpoczęto.
 
+### Czwarta runda — zatwierdzone
+
+- Odłączenie odbiornika: szara ikona przekreślonej myszy; dymek Odbiornik odłączony.
+- Akceptowane opóźnienie powrotu procentu po wybudzeniu: do 60 sekund. Dostępne ręczne Odśwież teraz. Szybszy powrót po zdarzeniu urządzenia jest dopuszczony, jeśli nie wymaga częstszego odpytywania.
+- Dystrybucja przez instalator MSI. Wariant przenośny nie jest planowany w pierwszej wersji.
+
 ## Otwarte decyzje
 
 - Docelowy wygląd wskaźnika: późniejszy etap; obecnie sama liczba bez znaku % i rysunku baterii.
-- Prezentacja po utracie odczytu, uśpieniu myszy i odłączeniu odbiornika.
+- Prezentacja błędu komunikacji i pierwszego uruchomienia bez poprawnego odczytu.
 - Weryfikacja protokołu baterii i współpraca z oprogramowaniem producenta.
-- Technologia, dystrybucja, wspierane wersje Windows i licencja.
+- Technologia, zakres instalacji MSI, aktualizacje, wspierane wersje Windows i licencja.
 
 ## Fakty i ograniczenia
 
