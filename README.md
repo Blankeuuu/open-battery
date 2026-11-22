@@ -18,4 +18,4 @@ Obsługa odczytu tego egzemplarza nie jest jeszcze potwierdzona. Działanie mysz
 - [Specyfikacja robocza](docs/spec.md)
 - [Słownik](GLOSSARY.md)
 
-Publiczne repozytorium; licencja do wyboru przed publikacją kodu. Implementacja wymaga zatwierdzenia pełnej specyfikacji przez użytkownika.
+Publiczne repozytorium na licencji [MIT](LICENSE). Implementacja wymaga zatwierdzenia pełnej specyfikacji przez użytkownika.

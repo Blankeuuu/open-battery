@@ -49,11 +49,17 @@ Status: trwa wywiad; implementacja niezatwierdzona.
 - Logi zawierają czas, próby odczytu, wyniki i błędy dotyczące myszy. Bez śledzenia ruchów, kliknięć, numerów seryjnych i danych innych urządzeń.
 - Podczas pracy na baterii procent biały lub czarny zgodnie z motywem Windows; przy 20% lub mniej pomarańczowy. Zielony jest zarezerwowany dla potwierdzonego ładowania.
 
+### Ósma runda — zatwierdzone
+
+- Przy potwierdzonym ładowaniu brak ostrzeżenia o niskiej baterii. Po ustaniu ładowania przy poziomie 20% lub mniej ostrzeżenie może zostać wysłane, jeśli nie było go w tym cyklu. Reguła ponownego uzbrojenia powyżej 25% pozostaje bez zmian.
+- Gdy aplikacja AJAZZ blokuje odbiornik: stan błędu, ponawianie co 60 sekund, bez zamykania innych programów. Diagnostyka może wskazać możliwy konflikt; pewna przyczyna tylko przy wiarygodnym rozpoznaniu.
+- Licencja projektu MIT; informacja copyright: Blankeuuu, 2026.
+
 ## Otwarte decyzje
 
 - Docelowy wygląd wskaźnika: późniejszy etap; obecnie sama liczba bez znaku % i rysunku baterii.
 - Weryfikacja protokołu baterii i współpraca z oprogramowaniem producenta.
-- Technologia i licencja; współpraca z aplikacją producenta, ostrzeganie podczas ładowania oraz końcowa akceptacja specyfikacji.
+- Wybór technologii oraz końcowa akceptacja specyfikacji.
 
 ## Fakty i ograniczenia
 
