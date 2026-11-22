@@ -13,3 +13,10 @@ Podłączony do komputera adapter USB pośredniczący w komunikacji z myszą prz
 
 **Poziom baterii**:
 Procent naładowania zgłoszony przez urządzenie, a nie prognoza pozostałego czasu pracy.
+
+**Nieaktywna mysz**:
+Mysz zgłoszona przez obecny odbiornik jako nieaktywna; może spać albo być wyłączona.
+_Unikaj_: błąd komunikacji jako synonim snu.
+
+**Ostatni odczyt**:
+Ostatni poprawnie otrzymany poziom baterii wraz z czasem otrzymania; przy nieaktywności lub błędzie stanowi informację historyczną.

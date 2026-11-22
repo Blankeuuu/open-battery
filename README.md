@@ -1,21 +1,40 @@
 # Open Battery
 
-Lekki wskaźnik baterii myszy dla Windows. Projekt jest na etapie uzgadniania działania; implementacja nie została rozpoczęta.
+Lekki, natywny wskaźnik baterii AJAZZ AJ179 Pro dla Windows 11 x64. Interfejs po angielsku, dokumentacja po polsku. Licencja [MIT](LICENSE).
 
-## Uzgodniony zakres
+## Działanie
 
-- Ikona w zasobniku systemowym obok zegara z widocznym procentem baterii.
-- Pierwsze urządzenie: AJAZZ AJ179 Pro przez odbiornik 2.4 GHz `3151:402D`.
-- Odczyt co 60 sekund podczas normalnej pracy.
-- Wskazanie poziomu baterii i stanu ładowania oraz jedno ostrzeżenie o niskiej baterii.
-- Minimalny narzut, bez stałego okna i bez aktywności sieciowej programu.
-- Bez historii, wykresów i prognozy pozostałych godzin w pierwszej wersji.
+- Procent w zasobniku obok zegara, odczyt co 60 sekund i ręczne Refresh now.
+- Zzz dla nieaktywnej myszy, przekreślona mysz dla odłączonego odbiornika, wykrzyknik dla błędu.
+- Jedno ostrzeżenie przy 20% lub mniej, pamiętane po restarcie; ponowne uzbrojenie po przekroczeniu 25%.
+- Start with Windows, Copy diagnostics, Debug mode, Open logs folder i Exit w menu.
+- Bez sieci, usługi i dodatkowego runtime. Logi wyłączone domyślnie; w debug mode maksymalnie 5 × 1 MB.
+- Odbiornik 3151:402D, kolekcja FFFF:0002. Wiarygodny stan ładowania tego modelu nie jest znany i nie jest zgadywany.
 
-Obsługa odczytu tego egzemplarza nie jest jeszcze potwierdzona. Działanie myszy jako HID nie potwierdza obsługi telemetrii baterii.
+## Instalacja
+
+Uruchom lokalnie zbudowany `build/OpenBattery-0.1.0-x64.msi`, następnie Open Battery z menu Start. Instalacja dla bieżącego użytkownika. Ikona może trafić pod strzałkę ukrytych ikon Windows.
+
+Aktualizacja nowszym MSI zachowuje ustawienia. Odinstalowanie przez Windows usuwa ustawienia, autostart i logi programu. MSI nie jest obecnie podpisane ani opublikowane jako release.
+
+## Budowanie i testy
+
+Wymagane: Windows x64, PowerShell i .NET SDK do narzędzia WiX. Sam program nie wymaga .NET.
+
+```powershell
+.\scripts\bootstrap.ps1
+.\scripts\build.ps1
+.\scripts\test.ps1
+.\build\battery-status.exe
+```
+
+Bootstrap pobiera przypięty Zig 0.15.2 jako kompilator C++ i lokalny WiX 4.0.6. Zig jest weryfikowany SHA256. Narzędzia i artefakty pozostają w ignorowanych katalogach .tools, .wix i build; nie zmieniają globalnego PATH. Szczegóły licencji narzędzi: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+Przed przebudową zamknij Open Battery. Testy parsera, ostrzeżeń, ikon i logów nie potrzebują myszy. Narzędzie battery-status wykonuje rzeczywisty odczyt HID.
 
 ## Dokumentacja
 
-- [Specyfikacja robocza](docs/spec.md)
+- [Specyfikacja](docs/spec.md)
+- [Protokół i dowody sprzętowe](docs/protocol.md)
+- [Weryfikacja](docs/verification.md)
 - [Słownik](GLOSSARY.md)
-
-Publiczne repozytorium na licencji [MIT](LICENSE). Implementacja wymaga zatwierdzenia pełnej specyfikacji przez użytkownika.

@@ -1,6 +1,6 @@
 # Specyfikacja Open Battery — zatwierdzona
 
-Status: pełna specyfikacja zatwierdzona przez użytkownika 2026-11-22. Implementacja nie została rozpoczęta; wymaga osobnego polecenia użytkownika.
+Status: pełna specyfikacja zatwierdzona przez użytkownika 2026-11-22. Użytkownik polecił rozpocząć implementację 2026-11-22; prace rozpoczęto od weryfikacji protokołu.
 
 ## Cel i zakres
 
@@ -74,7 +74,7 @@ MSI instaluje dla aktualnego użytkownika, bez administratora i usługi systemow
 
 ## Kolejność dalszych prac i granica zgody
 
-1. Końcowy przegląd i akceptacja specyfikacji: zakończone 2026-11-22. Oczekiwanie na osobne polecenie rozpoczęcia prac.
+1. Końcowy przegląd i akceptacja specyfikacji: zakończone 2026-11-22. Polecenie rozpoczęcia prac otrzymano 2026-11-22.
 2. Po osobnym poleceniu rozpoczęcia: weryfikacja rzeczywistego odczytu baterii tego egzemplarza.
 3. Dopiero po potwierdzeniu odczytu: budowa wskaźnika i MSI oraz testy funkcjonalne i zasobów.
 
@@ -93,4 +93,4 @@ W poprzedniej diagnostyce Windows wykrywał odbiornik 3151:402D jako sprawny. Ha
 
 ## Znany efekt sprawdzania środowiska
 
-Podczas badania narzędzi polecenie `dotnet tool list --global` uruchomiło inicjalizację .NET, która zgłosiła instalację developerskiego certyfikatu HTTPS. Nie uruchomiono nadawania zaufania. Bez wcześniejszej inwentaryzacji nie potwierdzono, czy certyfikat był nowy. Nie jest to zależność Open Battery; implementacji ani buildów nie uruchamiano.
+Podczas badania narzędzi polecenie `dotnet tool list --global` uruchomiło inicjalizację .NET, która zgłosiła instalację developerskiego certyfikatu HTTPS. Nie uruchomiono nadawania zaufania. Bez wcześniejszej inwentaryzacji nie potwierdzono, czy certyfikat był nowy. Nie jest to zależność Open Battery; w tamtym etapie nie uruchamiano implementacji ani buildów.
