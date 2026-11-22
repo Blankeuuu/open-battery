@@ -6,14 +6,21 @@ Status: trwa wywiad; implementacja niezatwierdzona.
 
 2026-11-22: użytkownik zaakceptował zakres opisany w README: zasobnik z procentem, AJ179 Pro przez 3151:402D, normalny odczyt co 60 sekund, stan ładowania i jedno ostrzeżenie, minimalny narzut bez stałego okna i sieci. Repozytorium publiczne, początkowo dokumentacja.
 
+
+### Druga runda — zatwierdzone
+
+- W pierwszej wersji wskaźnik pokazuje samą liczbę, np. 87, bez znaku % i rysunku baterii. Docelowa estetyka będzie dopracowana później. Po najechaniu: nazwa myszy, procent i czas ostatniego odczytu.
+- Ostrzeżenie przy poziomie 20% lub mniej, raz; ponowne uzbrojenie po odczycie powyżej 25%.
+- Domyślny start z Windows. Menu: Odśwież teraz, Uruchamiaj z Windows, Zakończ; bez osobnego okna ustawień na początek.
+- Przy braku wiarygodnego stanu ładowania pokazujemy wyłącznie procent. Wzrost procentu nie oznacza automatycznie ładowania.
+- Q7 pozostaje otwarte: odpowiedź użytkownika „nie pokazuje ze mysz spi” wymaga doprecyzowania. Nie zaakceptowano reguły dwóch nieudanych odczytów ani zastępowania procentu znakiem ? po pięciu minutach.
+
 ## Otwarte decyzje
 
-- Sposób prezentacji procentu i czytelność ikony.
+- Docelowy wygląd wskaźnika: późniejszy etap; obecnie sama liczba bez znaku % i rysunku baterii.
 - Prezentacja po utracie odczytu, uśpieniu myszy i odłączeniu odbiornika.
-- Próg ostrzeżenia i warunek jego ponownego uzbrojenia.
-- Uruchamianie z Windows oraz minimalna obsługa przez menu.
+- Zachowanie ostrzeżenia po ponownym uruchomieniu programu.
 - Mierzalny budżet RAM, CPU i pracy w tle.
-- Obsługa braku wiarygodnej informacji o ładowaniu.
 - Weryfikacja protokołu baterii i współpraca z oprogramowaniem producenta.
 - Technologia, dystrybucja, wspierane wersje Windows i licencja.
 
