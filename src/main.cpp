@@ -7,6 +7,7 @@
 #include <vector>
 #include "hid.hpp"
 #include "icons.hpp"
+#include "wake-input.hpp"
 #include "number-icon.hpp"
 #include "../build/version.hpp"
 
@@ -14,10 +15,14 @@ namespace {
 constexpr wchar_t product[]=L"Open Battery";
 constexpr wchar_t settingsKey[]=L"Software\\Open Battery";
 constexpr wchar_t runKey[]=L"Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-constexpr UINT trayMessage=WM_APP+1, resultMessage=WM_APP+2;
+constexpr UINT trayMessage=WM_APP+1, resultMessage=WM_APP+2, wakeMessage=WM_APP+3;
 constexpr UINT refreshId=100, autoId=101, copyId=102, debugId=103, logsId=104, exitId=105;
 HWND window=nullptr;
 HANDLE worker=nullptr;
+ob::WakeInput wakeInput;
+bool wakeRequested=false;
+unsigned wakeAttempts=0,wakeTriggers=0;
+ULONGLONG nextWakeAllowed=0,wakeStartedTick=0,lastWakeLatencyMs=0;
 HICON icon=nullptr;
 UINT taskbarCreated=0;
 bool debug=false, initialized=false;
@@ -64,7 +69,7 @@ void logReading(const ob::Reading& r){
     std::wstring path=logFolder+L"\\debug-0.log";
     WIN32_FILE_ATTRIBUTE_DATA data{};
     if(GetFileAttributesExW(path.c_str(),GetFileExInfoStandard,&data) &&
-       (data.nFileSizeHigh || data.nFileSizeLow>1000000-256)){
+       (data.nFileSizeHigh || data.nFileSizeLow>1000000-320)){
         DeleteFileW((logFolder+L"\\debug-4.log").c_str());
         for(int i=3;i>=0;--i)MoveFileExW((logFolder+L"\\debug-"+std::to_wstring(i)+L".log").c_str(),
             (logFolder+L"\\debug-"+std::to_wstring(i+1)+L".log").c_str(),MOVEFILE_REPLACE_EXISTING);
@@ -72,10 +77,10 @@ void logReading(const ob::Reading& r){
     HANDLE file=CreateFileW(path.c_str(),FILE_APPEND_DATA,FILE_SHARE_READ,nullptr,OPEN_ALWAYS,FILE_ATTRIBUTE_NORMAL,nullptr);
     if(file==INVALID_HANDLE_VALUE)return;
     SYSTEMTIME t;GetLocalTime(&t);
-    char line[256];
+    char line[320];
     const char* state=r.state==ob::State::reading?"reading":r.state==ob::State::inactive?"inactive":r.state==ob::State::disconnected?"disconnected":"error";
-    int n=snprintf(line,sizeof(line),"%04u-%02u-%02uT%02u:%02u:%02u receiver=3151:402d state=%s percent=%d charging=unknown win32_error=%lu\r\n",
-        t.wYear,t.wMonth,t.wDay,t.wHour,t.wMinute,t.wSecond,state,r.percent,r.error);
+    int n=snprintf(line,sizeof(line),"%04u-%02u-%02uT%02u:%02u:%02u receiver=3151:402d state=%s percent=%d charging=unknown win32_error=%lu wake=%u wake_ms=%llu\r\n",
+        t.wYear,t.wMonth,t.wDay,t.wHour,t.wMinute,t.wSecond,state,r.percent,r.error,wakeTriggers,wakeRequested?GetTickCount64()-wakeStartedTick:0);
     DWORD done;WriteFile(file,line,static_cast<DWORD>(n),&done,nullptr);CloseHandle(file);
 }
 bool darkTheme(){
@@ -175,8 +180,9 @@ void showWarning(){
     swprintf(d.szInfo,256,L"AJ179 Pro battery: %d%%. Please charge your mouse.",current.percent);
     Shell_NotifyIconW(NIM_MODIFY,&d);
 }
+ob::Reading (*queryBattery)()=ob::query;
 DWORD WINAPI pollWorker(void*){
-    auto r=new ob::Reading(ob::query());
+    auto r=new ob::Reading(queryBattery());
     if(!PostMessageW(window,resultMessage,0,reinterpret_cast<LPARAM>(r)))delete r;
     return 0;
 }
@@ -184,8 +190,43 @@ void refresh(){
     if(worker)return;
     worker=CreateThread(nullptr,0,pollWorker,nullptr,0,nullptr);
 }
+void monitorWake(){
+    if(current.state==ob::State::reading || current.state==ob::State::disconnected || wakeRequested){
+        wakeInput.stop();return;
+    }
+    ULONGLONG now=GetTickCount64();
+    if(now<nextWakeAllowed){
+        SetTimer(window,3,static_cast<UINT>(nextWakeAllowed-now),nullptr);return;
+    }
+    wakeInput.arm(window);
+}
+void requestWakeRefresh(){
+    if(current.state==ob::State::reading || current.state==ob::State::disconnected ||
+       wakeRequested || GetTickCount64()<nextWakeAllowed)return;
+    wakeInput.stop();KillTimer(window,3);
+    wakeRequested=true;wakeAttempts=1;++wakeTriggers;wakeStartedTick=GetTickCount64();
+    refresh(); // If a periodic read is in flight, its result schedules the retry.
+}
+void updateWakeAfterReading(){
+    if(current.state==ob::State::reading || current.state==ob::State::disconnected){
+        if(wakeRequested && current.state==ob::State::reading)lastWakeLatencyMs=GetTickCount64()-wakeStartedTick;
+        wakeRequested=false;wakeAttempts=0;nextWakeAllowed=0;
+        KillTimer(window,2);KillTimer(window,3);wakeInput.stop();return;
+    }
+    if(wakeRequested && wakeAttempts<4){
+        UINT delay=wakeAttempts==1?250:wakeAttempts==2?750:1500;
+        ++wakeAttempts;SetTimer(window,2,delay,nullptr);return;
+    }
+    if(wakeRequested){
+        wakeRequested=false;wakeAttempts=0;nextWakeAllowed=GetTickCount64()+15000;
+    }
+    monitorWake();
+}
+
 void copyDiagnostics(){
     std::wstring text=L"Open Battery " OB_VERSION L"\r\nReceiver: 3151:402D\r\n"+description()+
+        L"\r\nWake refreshes: "+std::to_wstring(wakeTriggers)+L"\r\nLast wake refresh ms: "+std::to_wstring(lastWakeLatencyMs)+
+        L"\r\nWake input error: "+std::to_wstring(wakeInput.error)+
         L"\r\nCharging: unknown\r\nWin32 error: "+std::to_wstring(current.error)+
         L"\r\nA receiver access error may be caused by another HID application.\r\n";
     if(!OpenClipboard(window))return;
@@ -220,8 +261,18 @@ void menu(){
 LRESULT CALLBACK wndProc(HWND h,UINT msg,WPARAM w,LPARAM l){
     if(msg==taskbarCreated && taskbarCreated){updateIcon(true);return 0;}
     switch(msg){
-    case WM_TIMER:refresh();return 0;
-    case WM_DEVICECHANGE:refresh();return 0;
+    case WM_TIMER:
+        if(w==1)refresh();
+        else if(w==2){KillTimer(h,2);refresh();}
+        else if(w==3){KillTimer(h,3);monitorWake();}
+        return 0;
+    case WM_INPUT:
+        if(wakeInput.accepts(reinterpret_cast<HRAWINPUT>(l))){
+            wakeInput.stop();PostMessageW(h,wakeMessage,0,0);
+        }
+        return DefWindowProcW(h,msg,w,l);
+    case wakeMessage:requestWakeRefresh();return 0;
+    case WM_DEVICECHANGE:wakeInput.stop();refresh();return 0;
     case WM_POWERBROADCAST:if(w==PBT_APMRESUMEAUTOMATIC)refresh();return TRUE;
     case WM_SETTINGCHANGE:case WM_THEMECHANGED:updateIcon();return 0;
     case resultMessage:{
@@ -230,7 +281,7 @@ LRESULT CALLBACK wndProc(HWND h,UINT msg,WPARAM w,LPARAM l){
         if(current.state==ob::State::reading){lastPercent=current.percent;GetLocalTime(&lastTime);}
         bool before=alert.warned;bool warn=alert.observe(current);
         if(before!=alert.warned)writeSetting(L"Warned",alert.warned);
-        logReading(current);updateIcon();if(warn)showWarning();return 0;
+        logReading(current);updateIcon();updateWakeAfterReading();if(warn)showWarning();return 0;
     }
     case trayMessage:{
         UINT event=LOWORD(l);
@@ -240,7 +291,7 @@ LRESULT CALLBACK wndProc(HWND h,UINT msg,WPARAM w,LPARAM l){
     }
     case WM_CLOSE:DestroyWindow(h);return 0;
     case WM_DESTROY:{
-        KillTimer(h,1);
+        KillTimer(h,1);KillTimer(h,2);KillTimer(h,3);wakeInput.stop();
         auto d=trayData();Shell_NotifyIconW(NIM_DELETE,&d);
         if(worker){CancelSynchronousIo(worker);WaitForSingleObject(worker,2000);CloseHandle(worker);worker=nullptr;}
         if(icon){DestroyIcon(icon);icon=nullptr;}

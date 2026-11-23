@@ -14,7 +14,7 @@ Ikona w zasobniku systemowym obok zegara; na początek sama liczba, bez znaku %.
 
 | Stan | Wskaźnik | Dymek |
 | --- | --- | --- |
-| Poprawny odczyt, praca na baterii | Procent JetBrains Mono Bold: 70–100% zielony, 30–69% pomarańczowy, 0–29% czerwony | Nazwa myszy, procent, czas odczytu |
+| Poprawny odczyt, praca na baterii | Procent JetBrains Mono ExtraBold: 70–100% zielony, 30–69% pomarańczowy, 0–29% czerwony | Nazwa myszy, procent, czas odczytu |
 | Potwierdzone ładowanie | Kolor procentu według poziomu baterii | Charging — 42% (wartość przykładowa), czas odczytu |
 | Nieaktywna mysz, odbiornik obecny | Księżyc z Z zamiast procentu (sleep_32.svg) | Mouse inactive, ostatni procent i czas odczytu, jeśli dostępne |
 | Odbiornik odłączony | Szara mysz z X (disconnected_mouse_x.svg) | Receiver disconnected |
@@ -26,8 +26,8 @@ Zzz może obejmować sen i wyłączenie myszy, jeśli protokół ich nie rozró�
 ## Odczyt i współpraca z urządzeniem
 
 - Normalne odpytywanie co 60 sekund; ręczne Refresh now.
-- Akceptowane opóźnienie powrotu procentu po wybudzeniu do 60 sekund.
-- Zdarzenie urządzenia może przyspieszyć powrót bez częstszego odpytywania.
+- Od wersji 0.1.3 aktywność AJ179 podczas snu lub błędu uruchamia natychmiastowy odczyt. Tymczasowy Raw Input identyfikuje odbiornik po nagłówku; nie odczytuje pozycji ani przycisków. Po poprawnym odczycie subskrypcja jest wyłączana.
+- Stary stan odbiornika: najwyżej 4 próby, dodatkowe po 250/750/1500 ms; po niepowodzeniu 15 s przerwy. Zdarzenie urządzenia również odświeża stan. Brak odpytywania przy każdym ruchu aktywnej myszy.
 - Jeśli aplikacja AJAZZ blokuje odbiornik: stan błędu i próba co 60 sekund, bez zamykania innych programów.
 - Możliwy konflikt można opisać w diagnostyce; pewna przyczyna tylko przy wiarygodnym rozpoznaniu.
 - Nie pokazujemy zmyślonych wartości. Ostatni odczyt przy błędzie lub nieaktywności jest opisany jako historyczny.

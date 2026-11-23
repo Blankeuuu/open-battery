@@ -1,10 +1,10 @@
-# JetBrains Mono Bold
+# JetBrains Mono ExtraBold
 
-Niezmieniony JetBrains Mono Bold 2.304 z oficjalnego wydania:
+Niezmieniony JetBrains Mono ExtraBold 2.304 z oficjalnego wydania:
 https://github.com/JetBrains/JetBrainsMono/tree/v2.304
 
-Plik: fonts/ttf/JetBrainsMono-Bold.ttf w repo źródłowym.
-SHA256: 5590990C82E097397517F275F430AF4546E1C45CFF408BDE4255DAD142479DCB.
+Plik: fonts/ttf/JetBrainsMono-ExtraBold.ttf w repo źródłowym.
+SHA256: 8E501D3A6A883E83EA4F7852804FB0894CEBDD67751BB1006B37A476CEF34CD6.
 
 Copyright 2020 The JetBrains Mono Project Authors. Licencja SIL Open Font License 1.1: OFL.txt. Kopia licencji jest dołączana do instalacji jako JetBrainsMono-OFL.txt.
 

@@ -29,11 +29,11 @@ scripts/render-icons.mjs przetwarza SVG za pomocą lokalnych, przypiętych @resv
 
 Podglądy po buildzie: build/icons/preview-dark.png i build/icons/preview-light.png. Zawierają też zachowane alternatywy rozłączenia. Oryginalna ikona app.svg jest kolorowa w obu motywach.
 
-## Procent i typografia — 0.1.2
+## Procent i typografia — 0.1.3
 
 Na polecenie użytkownika kolor cyfr odpowiada wyłącznie poziomowi baterii: 70–100% zielony, 30–69% pomarańczowy, 0–29% czerwony. Zielony nie jest już zarezerwowany dla ładowania. Powiadomienie o niskiej baterii nadal ma osobny próg 20%.
 
-Cyfry używają osadzonego JetBrains Mono Bold 2.304, ładowanego prywatnie przez AddFontMemResourceEx. Nie instalujemy fontu w Windows. Renderer rysuje w czterokrotnie większej skali i redukuje obraz przez uśrednianie pokrycia do premultiplikowanego kanału alfa. Wysokość cyfr jest stała; trzycyfrowe 100 jest lekko zwężone, żeby zmieściło się w małej ikonie.
+Cyfry używają osadzonego JetBrains Mono ExtraBold 2.304, ładowanego prywatnie przez AddFontMemResourceEx. Nie instalujemy fontu w Windows. Renderer rysuje w czterokrotnie większej skali i redukuje obraz przez uśrednianie pokrycia do premultiplikowanego kanału alfa. Wysokość cyfr jest stała; trzycyfrowe 100 wykorzystuje pełną szerokość ikony. Waga ExtraBold i korekta pokrycia alfa 0,85 wzmacniają czytelność w 16 px, zachowując przezroczyste tło.
 
 Kolory dla ciemnego / jasnego motywu:
 - zielony #55D98B / #168A45,

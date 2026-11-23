@@ -6,7 +6,7 @@ int wmain(){
     HDC dc=CreateCompatibleDC(nullptr);HFONT f=ob::digitFont(64);
     auto previous=SelectObject(dc,f);wchar_t face[64]{};GetTextFaceW(dc,64,face);
     wprintf(L"Selected font: %ls\n",face);
-    bool correct=std::wstring(face)==L"JetBrains Mono";
+    bool correct=std::wstring(face)==L"JetBrains Mono ExtraBold";
     SelectObject(dc,previous);DeleteObject(f);DeleteDC(dc);
     if(!correct)return 3;
     CreateDirectoryW(L"build\\numbers",nullptr);

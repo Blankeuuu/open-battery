@@ -26,8 +26,8 @@ inline COLORREF batteryColor(int percent,bool dark){
     }
 }
 inline HFONT digitFont(int height){
-    return CreateFontW(-height,0,0,0,FW_BOLD,FALSE,FALSE,FALSE,DEFAULT_CHARSET,
-        OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,ANTIALIASED_QUALITY,DEFAULT_PITCH,L"JetBrains Mono");
+    return CreateFontW(-height,0,0,0,FW_EXTRABOLD,FALSE,FALSE,FALSE,DEFAULT_CHARSET,
+        OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,ANTIALIASED_QUALITY,DEFAULT_PITCH,L"JetBrains Mono ExtraBold");
 }
 inline HICON numberIcon(const wchar_t* text,COLORREF color,int size,const wchar_t* save=nullptr){
     if(!loadNumberFont())return nullptr;
@@ -60,8 +60,9 @@ inline HICON numberIcon(const wchar_t* text,COLORREF color,int size,const wchar_
     if(right>=left && bottom>=top){
         int sw=right-left+1,sh=bottom-top+1;
         // Keep digit height stable; condense three digits to fit the tiny tray cell.
-        int th=(std::max)(1,size-4);
-        int tw=(std::max)(1,(std::min)(size-2,int(std::round(double(sw)*th/sh))));
+        int th=(std::max)(1,size-5);
+        int available=wcslen(text)>=3?size:size-2;
+        int tw=(std::max)(1,(std::min)(available,int(std::round(double(sw)*th/sh))));
         int ox=(size-tw)/2,oy=(size-th)/2;
         for(int y=0;y<th;++y)for(int x=0;x<tw;++x){
             double x0=left+double(x)*sw/tw,x1=left+double(x+1)*sw/tw;
@@ -72,7 +73,8 @@ inline HICON numberIcon(const wchar_t* text,COLORREF color,int size,const wchar_
                         ((std::min)(y1,double(sy+1))-(std::max)(y0,double(sy)));
                     total+=(src[sy*w+sx]&255)*area;
                 }
-            DWORD a=static_cast<DWORD>(std::round(total/((x1-x0)*(y1-y0))));
+            double coverage=total/((x1-x0)*(y1-y0)*255.0);
+            DWORD a=static_cast<DWORD>(std::round(255*std::pow(coverage,0.85)));
             dst[(oy+y)*size+ox+x]=(a<<24)|((GetRValue(color)*a/255)<<16)|
                 ((GetGValue(color)*a/255)<<8)|(GetBValue(color)*a/255);
         }

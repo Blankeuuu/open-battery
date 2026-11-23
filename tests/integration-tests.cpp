@@ -25,7 +25,7 @@ int main(){
     HDC fontDc=CreateCompatibleDC(nullptr);HFONT selected=ob::digitFont(64);
     auto previousFont=SelectObject(fontDc,selected);wchar_t face[64]{};
     GetTextFaceW(fontDc,64,face);
-    require(std::wstring(face)==L"JetBrains Mono","actual selected family is JetBrains Mono");
+    require(std::wstring(face)==L"JetBrains Mono ExtraBold","actual selected family is JetBrains Mono");
     SelectObject(fontDc,previousFont);DeleteObject(selected);DeleteDC(fontDc);
     for(bool dark : {false,true})for(int value : {0,29,30,69,70,100}){
         COLORREF c=ob::batteryColor(value,dark);
@@ -45,7 +45,8 @@ int main(){
             bool any=false,partial=false;
             for(int y=0;y<size;++y)for(int x=0;x<size;++x){
                 DWORD alpha=pixels[y*size+x]>>24;any|=alpha>0;partial|=alpha>0 && alpha<255;
-                if(x==0 || y==0 || x==size-1 || y==size-1)require(alpha==0,"digits fit with transparent border");
+                if(y==0 || y==size-1 || (wcslen(text)<3 && (x==0 || x==size-1)))
+                    require(alpha==0,"digits keep vertical padding; 100 may use the full width");
             }
             require(any && partial,"numeric icon has visible anti-aliased ink");
             DeleteDC(dc);DeleteObject(ii.hbmColor);DeleteObject(ii.hbmMask);DestroyIcon(number);

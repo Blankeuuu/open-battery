@@ -8,7 +8,7 @@ const {PNG}=require('pngjs'),{Resvg}=require('@resvg/resvg-js');
 const values=[100,70,69,30,29,0];
 for(const theme of ['dark','light']){
  const bg=theme==='dark'?'#202020':'#f3f3f3',fg=theme==='dark'?'white':'#111111';
- let svg='<svg xmlns="http://www.w3.org/2000/svg" width="680" height="340"><rect width="680" height="340" fill="'+bg+'"/><g fill="'+fg+'" font-family="Segoe UI" font-size="14"><text x="20" y="28">JetBrains Mono Bold — '+theme+' — actual native renderer</text>';
+ let svg='<svg xmlns="http://www.w3.org/2000/svg" width="680" height="340"><rect width="680" height="340" fill="'+bg+'"/><g fill="'+fg+'" font-family="Segoe UI" font-size="14"><text x="20" y="28">JetBrains Mono ExtraBold — '+theme+' — actual native renderer</text>';
  [16,20,24,32].forEach((size,row)=>{
   const y=52+row*44;svg+='<text x="20" y="'+(y+size-2)+'">'+size+' px</text>';
   values.forEach((value,col)=>{

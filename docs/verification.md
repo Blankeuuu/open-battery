@@ -76,3 +76,15 @@ MSI i EXE nie są podpisane. Nie opublikowano GitHub release.
 - Smoke procesu: 126,772 s, peak private 2 043 904 bajty, zerowy przyrost TotalProcessorTime w rozdzielczości licznika. Odbiornik zgłaszał inactive; nie jest to pełny 10-minutowy test aktywnego wyświetlania cyfr z nowym fontem. Renderowanie fontu sprawdzono oddzielnie w testach i narzędziu podglądu.
 - Podglądy: build/numbers/preview-dark.png i preview-light.png, odtwarzane przez scripts/preview-numbers.ps1.
 - Nie zmieniano HID ani reguł powiadomień. Nie opublikowano release i nie powtarzano pełnego odinstalowania ani pełnego cyklu sprzętowego.
+
+## Czytelność i wybudzanie — 0.1.3, 2026-11-23
+
+- Osadzony JetBrains Mono ExtraBold 2.304; większe cyfry i pełna szerokość 100. Obejrzano podglądy obu motywów z kodu produkcyjnego.
+- Test regresji przed poprawką: FAIL, aktywność przy inactive nie uruchamiała odczytu (0 prób). Po poprawce PASS: natychmiastowy odczyt, scalanie 100 zdarzeń, stare odpowiedzi odbiornika, odczyt już w toku, ograniczenie prób oraz filtrowanie urządzenia. Test używa kontrolowanego źródła danych, bez sprzętu.
+- scripts/build.ps1 i scripts/test.ps1: PASS; 24 kontrole modelu, rzeczywista rodzina ExtraBold i alfa cyfr, 56 przypadków zasobów, rotacja logów; 1000 cykli ikon GDI 5 -> 5.
+- Subskrypcja Raw Input rzeczywistego odbiornika: armed, error=0. Dwa fizyczne przejścia inactive -> reading po aktywności AJ179: około 47 ms od obsługi zdarzenia do odczytu. Użytkownik potwierdził natychmiastowy powrót procentu. To obserwacja lokalna, nie gwarancja czasu systemowego.
+- Pasywna identyfikacja urządzenia używa wyłącznie nagłówka Raw Input. Brak odczytu pozycji/przycisków i logowania ruchów. Subskrypcja tylko przy inactive/error, wyłączana po pierwszym zdarzeniu; najwyżej 4 odczyty i 15 s przerwy po niepowodzeniu.
+- Aktualizacja MSI 0.1.2 -> 0.1.3: exit 0, ustawienia zachowane, zainstalowana 0.1.3 uruchomiona. Tymczasowe logowanie stanów po próbie wyłączono, przywracając poprzedni brak wartości Debug.
+- Krótki pomiar 95,132 s z dwoma wybudzeniami i tymczasowym debug: CPU 0,01642% jednego rdzenia, peak private 2 121 728 bajtów. Nie zastępuje pełnego testu 10-minutowego.
+- EXE 883 200 bajtów; MSI 823 296 bajtów. SHA256 MSI: DC5F07FF6A400F25602EDAC4C2A654DFA060A9523CA5C8941912804DE857E8EE.
+- Bez zmian protokołu HID, palety i ostrzeżeń. Nie powtarzano pełnego odinstalowania ani testu rozładowania. Bez publikacji release.

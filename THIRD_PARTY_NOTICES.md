@@ -20,4 +20,4 @@ Są używane wyłącznie jako lokalne narzędzia w .tools/icon-tools, z przypię
 
 ## Font cyfr
 
-JetBrains Mono Bold 2.304, copyright 2020 The JetBrains Mono Project Authors: SIL Open Font License 1.1. Oryginalny TTF, pełna licencja i źródło są w fonts/. Font jest osadzony w EXE, a licencja instalowana jako JetBrainsMono-OFL.txt. Źródło: https://github.com/JetBrains/JetBrainsMono/tree/v2.304.
+JetBrains Mono ExtraBold 2.304, copyright 2020 The JetBrains Mono Project Authors: SIL Open Font License 1.1. Oryginalny TTF, pełna licencja i źródło są w fonts/. Font jest osadzony w EXE, a licencja instalowana jako JetBrainsMono-OFL.txt. Źródło: https://github.com/JetBrains/JetBrainsMono/tree/v2.304.
