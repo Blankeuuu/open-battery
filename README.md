@@ -4,7 +4,7 @@ Lekki, natywny wskaźnik baterii AJAZZ AJ179 Pro dla Windows 11 x64. Interfejs p
 
 ## Działanie
 
-- Procent w zasobniku obok zegara, odczyt co 60 sekund i ręczne Refresh now.
+- Procent w zasobniku: JetBrains Mono Bold; 70–100% zielony, 30–69% pomarańczowy, 0–29% czerwony. Odczyt co 60 sekund i ręczne Refresh now.
 - Zzz dla nieaktywnej myszy, przekreślona mysz dla odłączonego odbiornika, wykrzyknik dla błędu.
 - Jedno ostrzeżenie przy 20% lub mniej, pamiętane po restarcie; ponowne uzbrojenie po przekroczeniu 25%.
 - Start with Windows, Copy diagnostics, Debug mode, Open logs folder i Exit w menu.
@@ -13,7 +13,7 @@ Lekki, natywny wskaźnik baterii AJAZZ AJ179 Pro dla Windows 11 x64. Interfejs p
 
 ## Instalacja
 
-Uruchom lokalnie zbudowany `build/OpenBattery-0.1.1-x64.msi`, następnie Open Battery z menu Start. Instalacja dla bieżącego użytkownika. Ikona może trafić pod strzałkę ukrytych ikon Windows.
+Uruchom lokalnie zbudowany `build/OpenBattery-0.1.2-x64.msi`, następnie Open Battery z menu Start. Instalacja dla bieżącego użytkownika. Ikona może trafić pod strzałkę ukrytych ikon Windows.
 
 Aktualizacja nowszym MSI zachowuje ustawienia. Odinstalowanie przez Windows usuwa ustawienia, autostart i logi programu. MSI nie jest obecnie podpisane ani opublikowane jako release.
 

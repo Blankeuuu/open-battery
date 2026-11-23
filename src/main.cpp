@@ -7,6 +7,7 @@
 #include <vector>
 #include "hid.hpp"
 #include "icons.hpp"
+#include "number-icon.hpp"
 #include "../build/version.hpp"
 
 namespace {
@@ -85,6 +86,9 @@ bool darkTheme(){
 }
 HICON makeIcon(const wchar_t* text,COLORREF color,bool crossed=false,const wchar_t* save=nullptr){
     int size=GetSystemMetrics(SM_CXSMICON);if(size<16)size=16;
+    if(!crossed && text[0] && wcsspn(text,L"0123456789")==wcslen(text)){
+        if(HICON numeric=ob::numberIcon(text,color,size,save))return numeric;
+    }
     HDC screen=GetDC(nullptr),dc=CreateCompatibleDC(screen);
     BITMAPINFO info{};info.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
     info.bmiHeader.biWidth=size;info.bmiHeader.biHeight=-size;info.bmiHeader.biPlanes=1;
@@ -149,7 +153,7 @@ void updateIcon(bool add=false){
     COLORREF color=RGB(145,145,145);bool crossed=false;
     if(current.state==ob::State::reading){
         swprintf(text,8,L"%d",current.percent);
-        color=current.charging?RGB(50,190,100):current.percent<=20?RGB(235,145,25):darkTheme()?RGB(255,255,255):RGB(0,0,0);
+        color=ob::batteryColor(current.percent,darkTheme());
     } else if(current.state==ob::State::inactive)wcscpy(text,L"Zzz");
     else if(current.state==ob::State::disconnected)crossed=true;
     HICON next=nullptr;
@@ -291,5 +295,6 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR,int){
     while(GetMessageW(&msg,nullptr,0,0)>0){TranslateMessage(&msg);DispatchMessageW(&msg);}
     UnregisterClassW(wc.lpszClassName,instance);
     if(appIcon)DestroyIcon(appIcon);
+    ob::unloadNumberFont();
     CloseHandle(singleton);return 0;
 }

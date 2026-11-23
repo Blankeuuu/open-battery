@@ -6,7 +6,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const require=createRequire(path.join(root,'.tools/icon-tools/package.json'));
 const {Resvg}=require('@resvg/resvg-js');
 const {PNG}=require('pngjs');
-const version=process.argv[2]??'0.1.1';
+const version=process.argv[2]??'0.1.2';
 if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('Expected major.minor.patch version');
 const output=path.join(root,'build/icons');
 fs.mkdirSync(output,{recursive:true});
@@ -60,7 +60,8 @@ for(const [theme,tint] of Object.entries({dark:[184,184,184],light:[102,102,102]
 const rc=manifest.resources.map(r=>r.id+' ICON "'+path.join(output,r.file).replaceAll('\\','/')+'"').join('\n');
 const numbers=version.split('.').map(Number);
 const versionResource='1 VERSIONINFO\\n FILEVERSION '+numbers.join(',')+',0\\n PRODUCTVERSION '+numbers.join(',')+',0\\n FILEOS 0x40004\\n FILETYPE 1\\n BEGIN\\n BLOCK "StringFileInfo"\\n BEGIN\\n BLOCK "040904B0"\\n BEGIN\\n VALUE "FileDescription", "Open Battery\\0"\\n VALUE "FileVersion", "'+version+'\\0"\\n VALUE "ProductName", "Open Battery\\0"\\n VALUE "ProductVersion", "'+version+'\\0"\\n END\\n END\\n BLOCK "VarFileInfo"\\n BEGIN\\n VALUE "Translation", 0x409, 1200\\n END\\n END\\n';
-fs.writeFileSync(path.join(root,'build/icons.rc'),rc+'\n'+versionResource.replaceAll('\\n','\n'));
+const fontResource='200 RCDATA "'+path.join(root,'fonts/JetBrainsMono-Bold.ttf').replaceAll('\\','/')+'"\n';
+fs.writeFileSync(path.join(root,'build/icons.rc'),rc+'\n'+fontResource+versionResource.replaceAll('\\n','\n'));
 fs.writeFileSync(path.join(root,'build/version.hpp'),'#pragma once\n#define OB_VERSION L"'+version+'"\n');
 fs.writeFileSync(path.join(output,'manifest.json'),JSON.stringify(manifest,null,2));
 for(const theme of ['dark','light']){

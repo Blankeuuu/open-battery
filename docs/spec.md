@@ -14,8 +14,8 @@ Ikona w zasobniku systemowym obok zegara; na początek sama liczba, bez znaku %.
 
 | Stan | Wskaźnik | Dymek |
 | --- | --- | --- |
-| Poprawny odczyt, praca na baterii | Procent, biały/czarny według motywu; pomarańczowy przy ≤20% | Nazwa myszy, procent, czas odczytu |
-| Potwierdzone ładowanie | Zielony procent | Charging — 42% (wartość przykładowa), czas odczytu |
+| Poprawny odczyt, praca na baterii | Procent JetBrains Mono Bold: 70–100% zielony, 30–69% pomarańczowy, 0–29% czerwony | Nazwa myszy, procent, czas odczytu |
+| Potwierdzone ładowanie | Kolor procentu według poziomu baterii | Charging — 42% (wartość przykładowa), czas odczytu |
 | Nieaktywna mysz, odbiornik obecny | Księżyc z Z zamiast procentu (sleep_32.svg) | Mouse inactive, ostatni procent i czas odczytu, jeśli dostępne |
 | Odbiornik odłączony | Szara mysz z X (disconnected_mouse_x.svg) | Receiver disconnected |
 | Błąd odczytu, odbiornik obecny | Szary trójkąt z wykrzyknikiem (error_32.svg) | Could not read battery, ostatni procent i czas odczytu, jeśli dostępne |

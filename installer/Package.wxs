@@ -17,6 +17,7 @@
           <Component Id="Application" Guid="1283276A-4808-4144-AC92-A0F6F837A5C9">
             <File Id="AppExe" Source="$(var.BuildDir)\OpenBattery.exe" KeyPath="yes" />
             <File Id="License" Source="$(var.SourceDir)\LICENSE" />
+            <File Source="$(var.SourceDir)\fonts\OFL.txt" Name="JetBrainsMono-OFL.txt" />
             <File Source="$(var.SourceDir)\THIRD_PARTY_NOTICES.md" />
             <File Source="$(var.SourceDir)\third-party\zig-license.txt" />
             <File Source="$(var.SourceDir)\third-party\libcxx-license.txt" />

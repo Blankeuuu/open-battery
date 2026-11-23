@@ -17,3 +17,7 @@ WiX jest lokalnym narzędziem budowania, nie runtime aplikacji. Przypięta wersj
 @resvg/resvg-js 2.6.2: MPL-2.0, https://github.com/thx/resvg-js/tree/v2.6.2.
 pngjs 7.0.0: MIT, https://github.com/pngjs/pngjs/tree/v7.0.0.
 Są używane wyłącznie jako lokalne narzędzia w .tools/icon-tools, z przypiętym package-lock.json. Nie są linkowane ani dołączane do aplikacji i MSI. Oryginalne SVG dostarczył użytkownik projektu; konwersja zachowuje je bez zmian.
+
+## Font cyfr
+
+JetBrains Mono Bold 2.304, copyright 2020 The JetBrains Mono Project Authors: SIL Open Font License 1.1. Oryginalny TTF, pełna licencja i źródło są w fonts/. Font jest osadzony w EXE, a licencja instalowana jako JetBrainsMono-OFL.txt. Źródło: https://github.com/JetBrains/JetBrainsMono/tree/v2.304.

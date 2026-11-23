@@ -28,5 +28,11 @@ int main(){
     reading.charging=false;check(a.observe(reading),"unplug low battery warns once");
     reading.state=ob::State::inactive;reading.percent=100;check(!a.observe(reading) && a.warned,"cached sleep reading cannot rearm");
     reading.state=ob::State::error;check(!a.observe(reading) && a.warned,"error cannot rearm");
+    check(ob::batteryBand(0)==ob::BatteryBand::low,"0 is red band");
+    check(ob::batteryBand(29)==ob::BatteryBand::low,"29 is red band");
+    check(ob::batteryBand(30)==ob::BatteryBand::medium,"30 is orange band");
+    check(ob::batteryBand(69)==ob::BatteryBand::medium,"69 is orange band");
+    check(ob::batteryBand(70)==ob::BatteryBand::high,"70 is green band");
+    check(ob::batteryBand(100)==ob::BatteryBand::high,"100 is green band");
     printf("PASS: %d model checks\n",checks);
 }

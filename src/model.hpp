@@ -3,6 +3,8 @@
 #include <cstdint>
 
 namespace ob {
+enum class BatteryBand { low, medium, high };
+inline BatteryBand batteryBand(int percent){return percent>=70?BatteryBand::high:percent>=30?BatteryBand::medium:BatteryBand::low;}
 enum class State { reading, inactive, disconnected, error };
 struct Reading {
     State state = State::error;

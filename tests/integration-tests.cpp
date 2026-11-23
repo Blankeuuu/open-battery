@@ -21,6 +21,37 @@ int main(){
         }
     }
 
+    require(ob::loadNumberFont(),"embedded font loads privately");
+    HDC fontDc=CreateCompatibleDC(nullptr);HFONT selected=ob::digitFont(64);
+    auto previousFont=SelectObject(fontDc,selected);wchar_t face[64]{};
+    GetTextFaceW(fontDc,64,face);
+    require(std::wstring(face)==L"JetBrains Mono","actual selected family is JetBrains Mono");
+    SelectObject(fontDc,previousFont);DeleteObject(selected);DeleteDC(fontDc);
+    for(bool dark : {false,true})for(int value : {0,29,30,69,70,100}){
+        COLORREF c=ob::batteryColor(value,dark);
+        require(value>=70?GetGValue(c)>GetRValue(c):
+            value>=30?(GetRValue(c)>GetGValue(c) && GetGValue(c)>GetBValue(c)):
+            (GetRValue(c)>GetGValue(c) && GetRValue(c)>GetBValue(c)),
+            "battery colors match semantic thresholds");
+        for(int size : {16,20,24,32}){
+            wchar_t text[8];swprintf(text,8,L"%d",value);
+            HICON number=ob::numberIcon(text,c,size);require(number!=nullptr,"numeric icon renders");
+            ICONINFO ii{};require(GetIconInfo(number,&ii),"numeric icon metadata");
+            HDC dc=CreateCompatibleDC(nullptr);BITMAPINFO info{};
+            info.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);info.bmiHeader.biWidth=size;
+            info.bmiHeader.biHeight=-size;info.bmiHeader.biPlanes=1;info.bmiHeader.biBitCount=32;
+            std::vector<DWORD> pixels(size*size);
+            require(GetDIBits(dc,ii.hbmColor,0,size,pixels.data(),&info,DIB_RGB_COLORS)!=0,"numeric alpha pixels available");
+            bool any=false,partial=false;
+            for(int y=0;y<size;++y)for(int x=0;x<size;++x){
+                DWORD alpha=pixels[y*size+x]>>24;any|=alpha>0;partial|=alpha>0 && alpha<255;
+                if(x==0 || y==0 || x==size-1 || y==size-1)require(alpha==0,"digits fit with transparent border");
+            }
+            require(any && partial,"numeric icon has visible anti-aliased ink");
+            DeleteDC(dc);DeleteObject(ii.hbmColor);DeleteObject(ii.hbmMask);DestroyIcon(number);
+        }
+    }
+
     DWORD before=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS);
     for(int i=0;i<1000;++i){
         HICON a=i%4==0?makeIcon(L"100",RGB(255,255,255)):
@@ -47,5 +78,6 @@ int main(){
     }
     require(count==5,"log rotation retains five files");
     require(GetFileAttributesW((logFolder+L"\\debug-5.log").c_str())==INVALID_FILE_ATTRIBUTES,"no sixth log");
-    printf("PASS: 56 embedded icon variants; 1000 icon cycles, GDI %lu -> %lu; logging disabled by default; bounded five-file rotation\n",before,after);
+    ob::unloadNumberFont();
+    printf("PASS: private JetBrains font, thresholds and alpha; 56 embedded icon variants; 1000 icon cycles, GDI %lu -> %lu; logging disabled by default; bounded five-file rotation\n",before,after);
 }

@@ -63,3 +63,16 @@ MSI i EXE nie są podpisane. Nie opublikowano GitHub release.
 - Smoke test zasobów: 68,635 s, peak private 2 068 480 bajtów. Przyrost TotalProcessorTime był zerowy w rozdzielczości licznika; nie oznacza to absolutnego braku CPU. Nie powtarzano pełnego 10-minutowego pomiaru z sekcji 0.1.0.
 - Renderer SVG i Node są wyłącznie narzędziami builda. Aplikacja ładuje gotowe ICO z zasobów EXE; zachowano cel lekkiego runtime.
 - Nie powtarzano fizycznego testu odłączenia/uśpienia ani pełnego odinstalowania po zmianie samych ikon. Nie zmieniano HID ani reguł ostrzegania. Nie opublikowano release.
+
+## Kolory i JetBrains Mono — 0.1.2, 2026-11-23
+
+- Nowe progi: 70–100% zielony, 30–69% pomarańczowy, 0–29% czerwony. Kolor wynika z procentu, nie z flagi ładowania. Próg ostrzeżenia 20% jest osobną regułą.
+- Osadzono niezmieniony JetBrains Mono Bold 2.304 na OFL 1.1. Font jest prywatny dla procesu, bez instalacji systemowej. Licencję dołączono do MSI.
+- Renderowanie 4× i redukcja pokrycia do premultiplikowanego alfa; stała wysokość cyfr i dopasowanie szerokości 100. Obejrzano podglądy rzeczywistego kodu GDI na jasnym i ciemnym tle dla 16/20/24/32 px.
+- PASS: 24 kontrole modelu, w tym 0/29/30/69/70/100. Test GDI potwierdził rodzinę JetBrains Mono, właściwe pasma kolorów w obu motywach, widoczny antyaliasing i przezroczysty margines cyfr bez obcinania. Testy zasobów i rotacji logów nadal PASS. 1000 cykli: GDI 5 -> 5.
+- W testowej kompilacji ANSI wykryto różnicę typu RT_RCDATA; użyto jawnego MAKEINTRESOURCEW(10) i ponownie wykonano cały test oraz build.
+- Aktualizacja MSI 0.1.1 -> 0.1.2: exit 0; Initialized/Debug/Warned i autostart zachowane. Zainstalowana wersja FileVersion 0.1.2 jest uruchomiona.
+- EXE 876 544 bajty; MSI 823 296 bajtów. SHA256 MSI: B6714672B2E704923388A2E48B7FDD0141EF2B7010437E89471C810F67A1E6C7.
+- Smoke procesu: 126,772 s, peak private 2 043 904 bajty, zerowy przyrost TotalProcessorTime w rozdzielczości licznika. Odbiornik zgłaszał inactive; nie jest to pełny 10-minutowy test aktywnego wyświetlania cyfr z nowym fontem. Renderowanie fontu sprawdzono oddzielnie w testach i narzędziu podglądu.
+- Podglądy: build/numbers/preview-dark.png i preview-light.png, odtwarzane przez scripts/preview-numbers.ps1.
+- Nie zmieniano HID ani reguł powiadomień. Nie opublikowano release i nie powtarzano pełnego odinstalowania ani pełnego cyklu sprzętowego.
