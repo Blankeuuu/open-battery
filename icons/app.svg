@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <title>Open Battery</title>
+  <desc>Bluetooth symbol and charge indicator on a rounded dark application icon.</desc>
+  <defs>
+    <linearGradient id="tile" x1="61" y1="35" x2="442" y2="487" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#394558"/>
+      <stop offset=".38" stop-color="#202B3D"/>
+      <stop offset="1" stop-color="#0D1422"/>
+    </linearGradient>
+    <radialGradient id="bloom" cx="0" cy="0" r="1" gradientTransform="translate(170 24) rotate(62) scale(364 420)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#67A5F3" stop-opacity=".23"/>
+      <stop offset="1" stop-color="#67A5F3" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bluetooth" x1="134" y1="138" x2="298" y2="373" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#C8DEFF"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="275" y1="320" x2="429" y2="427" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#263345"/>
+      <stop offset="1" stop-color="#121B2B"/>
+    </linearGradient>
+    <linearGradient id="charge" x1="303" y1="350" x2="398" y2="378" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#80F3B4"/>
+      <stop offset="1" stop-color="#2FDB83"/>
+    </linearGradient>
+    <clipPath id="roundedTile">
+      <rect x="20" y="20" width="472" height="472" rx="108"/>
+    </clipPath>
+  </defs>
+
+  <!-- Transparent outside the rounded application tile. -->
+  <g clip-path="url(#roundedTile)">
+    <rect x="20" y="20" width="472" height="472" fill="url(#tile)"/>
+    <rect x="20" y="20" width="472" height="472" fill="url(#bloom)"/>
+    <path d="M20 125C93 64 171 46 268 49C368 52 422 92 492 154V20H20V125Z" fill="#FFFFFF" fill-opacity=".025"/>
+  </g>
+  <rect x="20.75" y="20.75" width="470.5" height="470.5" rx="107.25" stroke="#FFFFFF" stroke-opacity=".13" stroke-width="1.5"/>
+
+  <!-- Proper Bluetooth rune, rendered with consistent round strokes. -->
+  <g stroke="url(#bluetooth)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M216 139V365"/>
+    <path d="M216 139L280 198L149 313"/>
+    <path d="M216 365L280 306L149 191"/>
+  </g>
+
+  <!-- Separate charge-status badge: crisp at small Windows icon sizes. -->
+  <rect x="273" y="321" width="172" height="108" rx="33" fill="url(#badge)"/>
+  <rect x="273.75" y="321.75" width="170.5" height="106.5" rx="32.25" stroke="white" stroke-opacity=".18" stroke-width="1.5"/>
+  <rect x="297.5" y="349" width="110" height="51" rx="13" stroke="#F7FAFF" stroke-width="9"/>
+  <rect x="413" y="364" width="12" height="21" rx="5" fill="#F7FAFF"/>
+  <rect x="311" y="362" width="83" height="25" rx="6" fill="url(#charge)"/>
+</svg>

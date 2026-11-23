@@ -50,3 +50,16 @@ Nie potwierdzono pełnego cyklu rozładowania, fizycznego ładowania, kontrolowa
 Web app użytkownika pokazała pełną ikonę baterii, zgodną z raportowanym 100%; to nie jest kalibracja poziomu ogniwa. Ładowanie pozostaje unknown; brak zgadywania.
 
 MSI i EXE nie są podpisane. Nie opublikowano GitHub release.
+
+## Ikony i aktualizacja 0.1.1 — 2026-11-23
+
+- Podłączono oryginalne app.svg, sleep_32.svg, error_32.svg i disconnected_mouse_x.svg. Pozostałe trzy warianty rozłączenia zachowano.
+- Podglądy jasne/ciemne obejrzano w rozmiarach 16, 24, 32 i 48 px. Zasoby obejmują też 20, 40 i 64 px; aplikacja dodatkowo 128 i 256 px.
+- Test ładowania z natywnych zasobów: 56 przypadków (4 rodzaje × 2 motywy × 7 rozmiarów), każdy z kontrolą wymiarów — PASS. Ikona app jest ta sama dla obu motywów.
+- 1000 cykli tworzenia/usuwania ikon: GDI 6 -> 6. Testy 18 kontroli modelu oraz rotacji logów nadal PASS.
+- MSI 0.1.1 zainstalowane jako aktualizacja 0.1.0: exit 0. Wartości Initialized/Debug/Warned i autostart porównano przed i po — zachowane.
+- Końcowa aplikacja uruchomiona z LocalAppData/Programs/Open Battery, FileVersion 0.1.1. EXE 593 920 bajtów; MSI 696 320 bajtów.
+- MSI SHA256: 3A383DEF9F71352D48BB007284772D316A269240A58152A214264BE80B723146.
+- Smoke test zasobów: 68,635 s, peak private 2 068 480 bajtów. Przyrost TotalProcessorTime był zerowy w rozdzielczości licznika; nie oznacza to absolutnego braku CPU. Nie powtarzano pełnego 10-minutowego pomiaru z sekcji 0.1.0.
+- Renderer SVG i Node są wyłącznie narzędziami builda. Aplikacja ładuje gotowe ICO z zasobów EXE; zachowano cel lekkiego runtime.
+- Nie powtarzano fizycznego testu odłączenia/uśpienia ani pełnego odinstalowania po zmianie samych ikon. Nie zmieniano HID ani reguł ostrzegania. Nie opublikowano release.

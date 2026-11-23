@@ -16,10 +16,10 @@ Ikona w zasobniku systemowym obok zegara; na początek sama liczba, bez znaku %.
 | --- | --- | --- |
 | Poprawny odczyt, praca na baterii | Procent, biały/czarny według motywu; pomarańczowy przy ≤20% | Nazwa myszy, procent, czas odczytu |
 | Potwierdzone ładowanie | Zielony procent | Charging — 42% (wartość przykładowa), czas odczytu |
-| Nieaktywna mysz, odbiornik obecny | Kreskówkowe Zzz zamiast procentu | Mouse inactive, ostatni procent i czas odczytu, jeśli dostępne |
-| Odbiornik odłączony | Szara przekreślona mysz | Receiver disconnected |
-| Błąd odczytu, odbiornik obecny | Szary wykrzyknik | Could not read battery, ostatni procent i czas odczytu, jeśli dostępne |
-| Brak pierwszego poprawnego odczytu | Szary wykrzyknik | No reading |
+| Nieaktywna mysz, odbiornik obecny | Księżyc z Z zamiast procentu (sleep_32.svg) | Mouse inactive, ostatni procent i czas odczytu, jeśli dostępne |
+| Odbiornik odłączony | Szara mysz z X (disconnected_mouse_x.svg) | Receiver disconnected |
+| Błąd odczytu, odbiornik obecny | Szary trójkąt z wykrzyknikiem (error_32.svg) | Could not read battery, ostatni procent i czas odczytu, jeśli dostępne |
+| Brak pierwszego poprawnego odczytu | Szary trójkąt z wykrzyknikiem (error_32.svg) | No reading |
 
 Zzz może obejmować sen i wyłączenie myszy, jeśli protokół ich nie rozróżnia. Błąd komunikacji nie jest automatycznie snem. Techniczne rozpoznawanie stanów wymaga sprawdzenia protokołu. Brak wiarygodnej flagi ładowania oznacza pokazywanie samego procentu, bez oznaczania ładowania; sam wzrost procentu nie wystarcza.
 
@@ -78,7 +78,7 @@ MSI instaluje dla aktualnego użytkownika, bez administratora i usługi systemow
 2. Po osobnym poleceniu rozpoczęcia: weryfikacja rzeczywistego odczytu baterii tego egzemplarza.
 3. Dopiero po potwierdzeniu odczytu: budowa wskaźnika i MSI oraz testy funkcjonalne i zasobów.
 
-Akceptacja poszczególnych decyzji nie jest poleceniem rozpoczęcia implementacji. Szczegóły protokołu pozostają do zbadania. Docelowa estetyka została świadomie odłożona.
+Akceptacja poszczególnych decyzji nie jest poleceniem rozpoczęcia implementacji. Szczegóły protokołu pozostają do zbadania. Pierwszy zestaw SVG użytkownika podłączono 2026-11-23; mapowanie i pipeline opisano w icons/README.md.
 
 ## Podstawa i ograniczenia
 

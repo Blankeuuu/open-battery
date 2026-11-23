@@ -8,9 +8,23 @@ int main(){
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     HICON warm=makeIcon(L"100",RGB(255,255,255),false); DestroyIcon(warm);
     warm=makeIcon(L"Zzz",RGB(145,145,145),true); DestroyIcon(warm);
+    for(bool dark : {false,true}) {
+        for(auto kind : {ob::Artwork::app,ob::Artwork::sleep,ob::Artwork::disconnected,ob::Artwork::error}) {
+            for(int size : {16,20,24,32,40,48,64}) {
+                HICON a=ob::loadArtwork(kind,size,dark);
+                require(a!=nullptr,"embedded icon loads at each DPI size");
+                ICONINFO ii{};require(GetIconInfo(a,&ii),"icon metadata");
+                BITMAP bm{};GetObjectW(ii.hbmColor,sizeof(bm),&bm);
+                require(bm.bmWidth==size && bm.bmHeight==size,"embedded icon has exact requested dimensions");
+                DeleteObject(ii.hbmColor);DeleteObject(ii.hbmMask);DestroyIcon(a);
+            }
+        }
+    }
+
     DWORD before=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS);
     for(int i=0;i<1000;++i){
-        HICON a=makeIcon(i%2?L"100":L"Zzz",RGB(145,145,145),i%3==0);
+        HICON a=i%4==0?makeIcon(L"100",RGB(255,255,255)):
+            ob::loadArtwork(i%4==1?ob::Artwork::sleep:i%4==2?ob::Artwork::disconnected:ob::Artwork::error,32,i%2==0);
         require(a!=nullptr,"icon creation");DestroyIcon(a);
     }
     DWORD after=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS);
@@ -33,5 +47,5 @@ int main(){
     }
     require(count==5,"log rotation retains five files");
     require(GetFileAttributesW((logFolder+L"\\debug-5.log").c_str())==INVALID_FILE_ATTRIBUTES,"no sixth log");
-    printf("PASS: 1000 icons, GDI %lu -> %lu; logging disabled by default; bounded five-file rotation\n",before,after);
+    printf("PASS: 56 embedded icon variants; 1000 icon cycles, GDI %lu -> %lu; logging disabled by default; bounded five-file rotation\n",before,after);
 }

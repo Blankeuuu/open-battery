@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 #include "hid.hpp"
+#include "icons.hpp"
+#include "../build/version.hpp"
 
 namespace {
 constexpr wchar_t product[]=L"Open Battery";
@@ -150,7 +152,13 @@ void updateIcon(bool add=false){
         color=current.charging?RGB(50,190,100):current.percent<=20?RGB(235,145,25):darkTheme()?RGB(255,255,255):RGB(0,0,0);
     } else if(current.state==ob::State::inactive)wcscpy(text,L"Zzz");
     else if(current.state==ob::State::disconnected)crossed=true;
-    HICON next=makeIcon(text,color,crossed);
+    HICON next=nullptr;
+    if(current.state!=ob::State::reading){
+        auto artwork=current.state==ob::State::inactive?ob::Artwork::sleep:
+            current.state==ob::State::disconnected?ob::Artwork::disconnected:ob::Artwork::error;
+        next=ob::loadArtwork(artwork,GetSystemMetrics(SM_CXSMICON),darkTheme());
+    }
+    if(!next)next=makeIcon(text,color,crossed);
     auto d=trayData();d.uFlags=NIF_ICON|NIF_TIP|NIF_MESSAGE|NIF_SHOWTIP;d.hIcon=next;d.uCallbackMessage=trayMessage;
     auto tip=description();wcsncpy(d.szTip,tip.c_str(),127);d.szTip[127]=0;
     Shell_NotifyIconW(add?NIM_ADD:NIM_MODIFY,&d);
@@ -173,7 +181,7 @@ void refresh(){
     worker=CreateThread(nullptr,0,pollWorker,nullptr,0,nullptr);
 }
 void copyDiagnostics(){
-    std::wstring text=L"Open Battery 0.1.0\r\nReceiver: 3151:402D\r\n"+description()+
+    std::wstring text=L"Open Battery " OB_VERSION L"\r\nReceiver: 3151:402D\r\n"+description()+
         L"\r\nCharging: unknown\r\nWin32 error: "+std::to_wstring(current.error)+
         L"\r\nA receiver access error may be caused by another HID application.\r\n";
     if(!OpenClipboard(window))return;
@@ -272,7 +280,8 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR,int){
     alert.warned=readSetting(L"Warned")!=0;debug=readSetting(L"Debug")!=0;
     initialized=readSetting(L"Initialized")!=0;
     if(!initialized){if(setAutoStart(true))writeSetting(L"Initialized",1);}
-    WNDCLASSW wc{};wc.lpfnWndProc=wndProc;wc.hInstance=instance;wc.lpszClassName=L"OpenBattery.Tray";
+    HICON appIcon=ob::loadArtwork(ob::Artwork::app,GetSystemMetrics(SM_CXICON),true);
+    WNDCLASSW wc{};wc.hIcon=appIcon;wc.lpfnWndProc=wndProc;wc.hInstance=instance;wc.lpszClassName=L"OpenBattery.Tray";
     if(!RegisterClassW(&wc)){CloseHandle(singleton);return 2;}
     window=CreateWindowExW(WS_EX_TOOLWINDOW,wc.lpszClassName,product,WS_OVERLAPPED,0,0,0,0,nullptr,nullptr,instance,nullptr);
     if(!window){CloseHandle(singleton);return 3;}
@@ -280,5 +289,7 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR,int){
     updateIcon(true);SetTimer(window,1,60000,nullptr);refresh();
     MSG msg;
     while(GetMessageW(&msg,nullptr,0,0)>0){TranslateMessage(&msg);DispatchMessageW(&msg);}
+    UnregisterClassW(wc.lpszClassName,instance);
+    if(appIcon)DestroyIcon(appIcon);
     CloseHandle(singleton);return 0;
 }

@@ -13,13 +13,13 @@ Lekki, natywny wskaźnik baterii AJAZZ AJ179 Pro dla Windows 11 x64. Interfejs p
 
 ## Instalacja
 
-Uruchom lokalnie zbudowany `build/OpenBattery-0.1.0-x64.msi`, następnie Open Battery z menu Start. Instalacja dla bieżącego użytkownika. Ikona może trafić pod strzałkę ukrytych ikon Windows.
+Uruchom lokalnie zbudowany `build/OpenBattery-0.1.1-x64.msi`, następnie Open Battery z menu Start. Instalacja dla bieżącego użytkownika. Ikona może trafić pod strzałkę ukrytych ikon Windows.
 
 Aktualizacja nowszym MSI zachowuje ustawienia. Odinstalowanie przez Windows usuwa ustawienia, autostart i logi programu. MSI nie jest obecnie podpisane ani opublikowane jako release.
 
 ## Budowanie i testy
 
-Wymagane: Windows x64, PowerShell i .NET SDK do narzędzia WiX. Sam program nie wymaga .NET.
+Wymagane: Windows x64, PowerShell, Node.js z npm i .NET SDK do narzędzia WiX. Sam program nie wymaga .NET.
 
 ```powershell
 .\scripts\bootstrap.ps1
@@ -37,4 +37,5 @@ Przed przebudową zamknij Open Battery. Testy parsera, ostrzeżeń, ikon i logó
 - [Specyfikacja](docs/spec.md)
 - [Protokół i dowody sprzętowe](docs/protocol.md)
 - [Weryfikacja](docs/verification.md)
+- [Ikony i podglądy](icons/README.md)
 - [Słownik](GLOSSARY.md)

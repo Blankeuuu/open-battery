@@ -11,6 +11,10 @@ try {
         if ($hash -ne '3a0ed1e8799a2f8ce2a6e6290a9ff22e6906f8227865911fb7ddedc3cc14cb0c') { throw 'Zig archive SHA256 mismatch.' }
         Expand-Archive -LiteralPath $archive -DestinationPath '.tools' -Force
     }
+    New-Item -ItemType Directory -Path '.tools\icon-tools' -Force | Out-Null
+    Copy-Item -LiteralPath 'tools\icon-tools\package.json','tools\icon-tools\package-lock.json' -Destination '.tools\icon-tools'
+    npm.cmd ci --prefix .tools/icon-tools --ignore-scripts --no-audit --no-fund
+    if ($LASTEXITCODE) { throw 'Icon build tools installation failed.' }
     $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
     $env:DOTNET_GENERATE_ASPNET_CERTIFICATE = 'false'
     $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
