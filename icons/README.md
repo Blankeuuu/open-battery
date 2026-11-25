@@ -41,3 +41,17 @@ Kolory dla ciemnego / jasnego motywu:
 - czerwony #FF6969 / #C82D37.
 
 Podgląd rzeczywistego renderera: scripts/preview-numbers.ps1 po buildzie. Wyniki: build/numbers/preview-dark.png i preview-light.png (16, 20, 24, 32 px i powiększenie ×4). Menu i pozostałe ikony zachowują swój styl.
+
+
+## Wiele urządzeń — 0.2.1
+
+Po próbie wariantu A użytkownik wybrał C: osobny pełny symbol urządzenia i pełna liczba, dwa miejsca w zasobniku na urządzenie. Numer i błyskawica znajdują się przy symbolu; przybliżenie tylko w dymku i Devices. Potwierdzone ładowanie barwi symbol na zielono, bez zmiany progów koloru procentu. Rozmieszczeniem ikon zarządza Windows. Zasoby SVG wcześniejszej wersji zachowano; aplikacja nadal używa app.svg jako ikony programu.
+
+Rzeczywiste symbole C powstają w src/device-icon.hpp, liczby w src/number-icon.hpp. Odtworzenie podglądów: zbudować tools/device-icon-preview.cpp z build/icons.obj i uruchomić, następnie node scripts/preview-device-icons.mjs. Plansze: preview/native-C-dark.png oraz native-C-light.png. Pozostałe plansze A/B/C są historycznym porównaniem koncepcyjnym.
+
+
+## Aktualny wskaźnik — 0.2.2: kolorowy okrąg
+
+Użytkownik zastąpił A/C jednym wskaźnikiem: kolorowy okrąg wokół procentu. Kolor okręgu identyfikuje urządzenie i jest wybierany w Devices, niezależnie od koloru cyfr oznaczającego poziom. Renderer natywny: src/ring-icon.hpp, z zachowaniem prywatnego fontu ExtraBold i premultiplikowanego alfa. Numer pomocniczy pozostał tylko w dymku. Znane ładowanie ma małą błyskawicę; okrąg zachowuje swoją tożsamość.
+
+Podglądy Win32/GDI: tools/ring-preview.cpp + build/icons.obj, następnie node scripts/preview-ring-icons.mjs. Wyniki preview/native-ring-dark.png i native-ring-light.png w 16/20/24/32 px i powiększeniu ×4. Starsze podglądy są zachowane jako historia.

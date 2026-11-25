@@ -1,4 +1,4 @@
-param([string]$Version = '0.1.3', [switch]$SkipMsi)
+param([string]$Version = '0.2.2', [switch]$SkipMsi)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 Push-Location $root
@@ -16,8 +16,10 @@ try {
     if ($LASTEXITCODE) { throw 'Model tests failed.' }
     & $zig c++ tools/battery-status.cpp -O2 -std=c++20 -lhid -lsetupapi -o build/battery-status.exe
     if ($LASTEXITCODE) { throw 'Status tool compilation failed.' }
-    & $zig c++ src/main.cpp build/icons.obj -O2 -std=c++20 -municode '-Wl,--subsystem,windows' -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -o build/OpenBattery.exe
+    & $zig c++ src/main.cpp build/icons.obj -O2 -std=c++20 -municode '-Wl,--subsystem,windows' -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -lbthprops -lcfgmgr32 -lcomdlg32 -o build/OpenBattery.exe
     if ($LASTEXITCODE) { throw 'Application compilation failed. Close Open Battery before rebuilding.' }
+    & $zig c++ tools/devices-status.cpp -O2 -std=c++20 -municode -lhid -lsetupapi -lbthprops -lole32 -luuid -ladvapi32 -o build/devices-status.exe
+    if ($LASTEXITCODE) { throw 'Device status tool compilation failed.' }
     if (!$SkipMsi) {
         $wix = Join-Path $root '.tools\wix\wix.exe'
         if (!(Test-Path -LiteralPath $wix)) { throw 'Run scripts/bootstrap.ps1 first.' }

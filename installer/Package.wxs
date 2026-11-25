@@ -2,7 +2,7 @@
   <Package Name="Open Battery" Manufacturer="Blankeuuu" Version="$(var.ProductVersion)"
            UpgradeCode="7864321E-6268-43C8-A71C-27C26AEF33D1" Language="1033" Scope="perUser"
            InstallerVersion="500" Compressed="yes">
-    <SummaryInformation Description="Lightweight mouse battery indicator for Windows 11 x64" />
+    <SummaryInformation Description="Lightweight device battery indicator for Windows 11 x64" />
     <MajorUpgrade DowngradeErrorMessage="A newer version of Open Battery is already installed." />
     <MediaTemplate EmbedCab="yes" />
     <Icon Id="OpenBatteryIcon" SourceFile="$(var.BuildDir)\icons\app.ico" />

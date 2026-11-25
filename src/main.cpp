@@ -1,6 +1,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shellapi.h>
+#include <dbt.h>
+#include <commdlg.h>
 #include <shlobj.h>
 #include <cstdio>
 #include <string>
@@ -9,6 +11,10 @@
 #include "icons.hpp"
 #include "wake-input.hpp"
 #include "number-icon.hpp"
+#include "bluetooth.hpp"
+#include "device-settings.hpp"
+#include "device-icon.hpp"
+#include "ring-icon.hpp"
 #include "../build/version.hpp"
 
 namespace {
@@ -25,7 +31,10 @@ unsigned wakeAttempts=0,wakeTriggers=0;
 ULONGLONG nextWakeAllowed=0,wakeStartedTick=0,lastWakeLatencyMs=0;
 HICON icon=nullptr;
 UINT taskbarCreated=0;
+HDEVNOTIFY deviceNotification=nullptr;
 bool debug=false, initialized=false;
+bool multiMode=false;
+void updateAllIcons(bool add);
 ob::Alert alert;
 ob::Reading current;
 int lastPercent=-1;
@@ -63,7 +72,7 @@ bool setAutoStart(bool enabled){
 void ensureFolders(){
     CreateDirectoryW(folder.c_str(),nullptr);CreateDirectoryW(logFolder.c_str(),nullptr);
 }
-void logReading(const ob::Reading& r){
+void logReading(const ob::Reading& r,const char* label="3151:402d"){
     if(!debug)return;
     ensureFolders();
     std::wstring path=logFolder+L"\\debug-0.log";
@@ -79,8 +88,8 @@ void logReading(const ob::Reading& r){
     SYSTEMTIME t;GetLocalTime(&t);
     char line[320];
     const char* state=r.state==ob::State::reading?"reading":r.state==ob::State::inactive?"inactive":r.state==ob::State::disconnected?"disconnected":"error";
-    int n=snprintf(line,sizeof(line),"%04u-%02u-%02uT%02u:%02u:%02u receiver=3151:402d state=%s percent=%d charging=unknown win32_error=%lu wake=%u wake_ms=%llu\r\n",
-        t.wYear,t.wMonth,t.wDay,t.wHour,t.wMinute,t.wSecond,state,r.percent,r.error,wakeTriggers,wakeRequested?GetTickCount64()-wakeStartedTick:0);
+    int n=snprintf(line,sizeof(line),"%04u-%02u-%02uT%02u:%02u:%02u device=%s state=%s percent=%d charging=%s approximate=%d win32_error=%lu wake=%u wake_ms=%llu\r\n",
+        t.wYear,t.wMonth,t.wDay,t.wHour,t.wMinute,t.wSecond,label,state,r.percent,r.chargingKnown?(r.charging?"yes":"no"):"unknown",r.approximate,r.error,wakeTriggers,wakeRequested?GetTickCount64()-wakeStartedTick:0);
     DWORD done;WriteFile(file,line,static_cast<DWORD>(n),&done,nullptr);CloseHandle(file);
 }
 bool darkTheme(){
@@ -154,6 +163,7 @@ NOTIFYICONDATAW trayData(){
     NOTIFYICONDATAW d{};d.cbSize=sizeof(d);d.hWnd=window;d.uID=1;return d;
 }
 void updateIcon(bool add=false){
+    if(multiMode){updateAllIcons(add);return;}
     wchar_t text[8]=L"!";
     COLORREF color=RGB(145,145,145);bool crossed=false;
     if(current.state==ob::State::reading){
@@ -180,14 +190,23 @@ void showWarning(){
     swprintf(d.szInfo,256,L"AJ179 Pro battery: %d%%. Please charge your mouse.",current.percent);
     Shell_NotifyIconW(NIM_MODIFY,&d);
 }
+#include "multi-app.hpp"
+ob::Reading pollPrevious;
 ob::Reading (*queryBattery)()=ob::query;
 DWORD WINAPI pollWorker(void*){
-    auto r=new ob::Reading(queryBattery());
+    auto r=new ob::Reading(pollAj?queryBattery():pollPrevious);
+    if(multiMode && pollAux){auxResult=ob::queryOtherDevices(pollSelected,false,pollExtended);auxPending=true;}
     if(!PostMessageW(window,resultMessage,0,reinterpret_cast<LPARAM>(r)))delete r;
     return 0;
 }
 void refresh(){
-    if(worker)return;
+    if(worker){if(multiMode)refreshQueued=true;return;}
+    if(multiMode){
+        pollAux=requestedDevice!=L"aj179";pollAj=requestedDevice.empty() || requestedDevice==L"aj179";pollPrevious=current;
+        pollSelected.clear();pollExtended.clear();for(const auto& d:devices)if(d.enabled && (requestedDevice.empty() || requestedDevice==d.id)){pollSelected.push_back(d.id);if(d.extendedReports)pollExtended.push_back(d.id);}
+        if(auto aj=getDevice(L"aj179");aj && !aj->enabled)pollAj=false;
+        requestedDevice.clear();
+    }
     worker=CreateThread(nullptr,0,pollWorker,nullptr,0,nullptr);
 }
 void monitorWake(){
@@ -198,6 +217,7 @@ void monitorWake(){
     if(now<nextWakeAllowed){
         SetTimer(window,3,static_cast<UINT>(nextWakeAllowed-now),nullptr);return;
     }
+    if(multiMode){auto aj=getDevice(L"aj179");if(!aj || !aj->enabled){wakeInput.stop();return;}}
     wakeInput.arm(window);
 }
 void requestWakeRefresh(){
@@ -205,7 +225,8 @@ void requestWakeRefresh(){
        wakeRequested || GetTickCount64()<nextWakeAllowed)return;
     wakeInput.stop();KillTimer(window,3);
     wakeRequested=true;wakeAttempts=1;++wakeTriggers;wakeStartedTick=GetTickCount64();
-    refresh(); // If a periodic read is in flight, its result schedules the retry.
+    if(multiMode)requestedDevice=L"aj179";
+    if(!worker)refresh(); // An in-flight result schedules the bounded wake retry.
 }
 void updateWakeAfterReading(){
     if(current.state==ob::State::reading || current.state==ob::State::disconnected){
@@ -229,6 +250,7 @@ void copyDiagnostics(){
         L"\r\nWake input error: "+std::to_wstring(wakeInput.error)+
         L"\r\nCharging: unknown\r\nWin32 error: "+std::to_wstring(current.error)+
         L"\r\nA receiver access error may be caused by another HID application.\r\n";
+    if(multiMode){for(const auto& d:devices)text+=L"\r\n"+std::wstring(ob::kindText(d.kind))+L" ["+ob::storageId(d.id)+L"] "+d.connection+L": "+ob::stateText(d.reading.state)+L", level="+std::to_wstring(d.reading.percent)+L", error="+std::to_wstring(d.reading.error);}
     if(!OpenClipboard(window))return;
     HGLOBAL mem=GlobalAlloc(GMEM_MOVEABLE,(text.size()+1)*sizeof(wchar_t));
     if(mem){void* p=GlobalLock(mem);if(p){
@@ -237,9 +259,10 @@ void copyDiagnostics(){
     }else GlobalFree(mem);}
     CloseClipboard();
 }
-void menu(){
+void menu(const std::wstring& selected=L"aj179"){
     HMENU m=CreatePopupMenu();
-    AppendMenuW(m,MF_STRING,refreshId,L"Refresh now");
+    AppendMenuW(m,MF_STRING,refreshId,L"Refresh this device");
+    AppendMenuW(m,MF_STRING,devicesId,L"Devices...");
     AppendMenuW(m,MF_STRING|(autoStart()?MF_CHECKED:0),autoId,L"Start with Windows");
     AppendMenuW(m,MF_SEPARATOR,0,nullptr);
     AppendMenuW(m,MF_STRING,copyId,L"Copy diagnostics");
@@ -250,7 +273,8 @@ void menu(){
     UINT cmd=TrackPopupMenu(m,TPM_RETURNCMD|TPM_RIGHTBUTTON,p.x,p.y,0,window,nullptr);
     DestroyMenu(m);PostMessageW(window,WM_NULL,0,0);
     switch(cmd){
-    case refreshId:refresh();break;
+    case refreshId:if(multiMode)refreshOne(selected);else refresh();break;
+    case devicesId:showDevices(selected);break;
     case autoId:if(!setAutoStart(!autoStart()))MessageBoxW(window,L"Could not update Start with Windows.",product,MB_OK|MB_ICONERROR);break;
     case copyId:copyDiagnostics();break;
     case debugId:debug=!debug;writeSetting(L"Debug",debug);if(debug)logReading(current);break;
@@ -263,8 +287,9 @@ LRESULT CALLBACK wndProc(HWND h,UINT msg,WPARAM w,LPARAM l){
     switch(msg){
     case WM_TIMER:
         if(w==1)refresh();
-        else if(w==2){KillTimer(h,2);refresh();}
+        else if(w==2){KillTimer(h,2);if(multiMode)requestedDevice=L"aj179";refresh();}
         else if(w==3){KillTimer(h,3);monitorWake();}
+        else if(w==4){KillTimer(h,4);refresh();}
         return 0;
     case WM_INPUT:
         if(wakeInput.accepts(reinterpret_cast<HRAWINPUT>(l))){
@@ -272,27 +297,39 @@ LRESULT CALLBACK wndProc(HWND h,UINT msg,WPARAM w,LPARAM l){
         }
         return DefWindowProcW(h,msg,w,l);
     case wakeMessage:requestWakeRefresh();return 0;
-    case WM_DEVICECHANGE:wakeInput.stop();refresh();return 0;
+    case WM_DEVICECHANGE:wakeInput.stop();SetTimer(h,4,250,nullptr);return 0;
     case WM_POWERBROADCAST:if(w==PBT_APMRESUMEAUTOMATIC)refresh();return TRUE;
     case WM_SETTINGCHANGE:case WM_THEMECHANGED:updateIcon();return 0;
     case resultMessage:{
-        auto r=reinterpret_cast<ob::Reading*>(l);current=*r;delete r;
+        auto r=reinterpret_cast<ob::Reading*>(l);if(!multiMode || pollAj)current=*r;delete r;
         if(worker){WaitForSingleObject(worker,INFINITE);CloseHandle(worker);worker=nullptr;}
-        if(current.state==ob::State::reading){lastPercent=current.percent;GetLocalTime(&lastTime);}
-        bool before=alert.warned;bool warn=alert.observe(current);
+        if((!multiMode || pollAj) && current.state==ob::State::reading){lastPercent=current.percent;GetLocalTime(&lastTime);}
+        bool before=alert.warned;bool warn=!multiMode && alert.observe(current);
         if(before!=alert.warned)writeSetting(L"Warned",alert.warned);
-        logReading(current);updateIcon();updateWakeAfterReading();if(warn)showWarning();return 0;
+        if(multiMode){
+            if(auto aj=getDevice(L"aj179");aj && pollAj){aj->observe(current,fileTimeNow());}
+            receiveOtherDevices();updateAllIcons();
+            if(auto aj=getDevice(L"aj179");aj && pollAj)warningFor(*aj);
+            refreshDeviceWindow();
+        }
+        if(!multiMode || pollAj)logReading(current);if(!multiMode)updateIcon();updateWakeAfterReading();if(warn && !multiMode)showWarning();
+        if(multiMode && refreshQueued){refreshQueued=false;refresh();}return 0;
     }
     case trayMessage:{
         UINT event=LOWORD(l);
-        if(event==WM_CONTEXTMENU || event==NIN_KEYSELECT)menu();
+        if(multiMode){auto id=trayDeviceId(HIWORD(l));
+            if(event==WM_CONTEXTMENU)menu(id);else if(event==NIN_KEYSELECT || event==WM_LBUTTONUP || event==NIN_SELECT)showDevices(id);
+        }else if(event==WM_CONTEXTMENU || event==NIN_KEYSELECT)menu();
         else if(event==WM_LBUTTONUP || event==NIN_SELECT)refresh();
         return 0;
     }
+    case WM_APP+4:showDevices();return 0;
     case WM_CLOSE:DestroyWindow(h);return 0;
     case WM_DESTROY:{
-        KillTimer(h,1);KillTimer(h,2);KillTimer(h,3);wakeInput.stop();
+        KillTimer(h,1);KillTimer(h,2);KillTimer(h,3);KillTimer(h,4);wakeInput.stop();
+        if(deviceNotification){UnregisterDeviceNotification(deviceNotification);deviceNotification=nullptr;}
         auto d=trayData();Shell_NotifyIconW(NIM_DELETE,&d);
+        if(multiMode){if(devicesWindow)DestroyWindow(devicesWindow);for(auto& t:trays)removeTray(t);trays.clear();}
         if(worker){CancelSynchronousIo(worker);WaitForSingleObject(worker,2000);CloseHandle(worker);worker=nullptr;}
         if(icon){DestroyIcon(icon);icon=nullptr;}
         PostQuitMessage(0);return 0;
@@ -326,9 +363,10 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR,int){
         LocalFree(argv);return 0;
     }
 
+    bool openDevices=argc>1 && std::wstring(argv[1])==L"--devices";
     LocalFree(argv);
     HANDLE singleton=CreateMutexW(nullptr,FALSE,L"Local\\OpenBattery.Tray");
-    if(!singleton || GetLastError()==ERROR_ALREADY_EXISTS){if(singleton)CloseHandle(singleton);return 0;}
+    if(!singleton || GetLastError()==ERROR_ALREADY_EXISTS){if(openDevices){HWND existing=FindWindowW(L"OpenBattery.Tray",product);if(existing)PostMessageW(existing,WM_APP+4,0,0);}if(singleton)CloseHandle(singleton);return 0;}
     PWSTR local=nullptr;
     if(FAILED(SHGetKnownFolderPath(FOLDERID_LocalAppData,0,nullptr,&local))){CloseHandle(singleton);return 1;}
     folder=std::wstring(local)+L"\\Open Battery";CoTaskMemFree(local);logFolder=folder+L"\\Logs";
@@ -340,10 +378,14 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE,PWSTR,int){
     if(!RegisterClassW(&wc)){CloseHandle(singleton);return 2;}
     window=CreateWindowExW(WS_EX_TOOLWINDOW,wc.lpszClassName,product,WS_OVERLAPPED,0,0,0,0,nullptr,nullptr,instance,nullptr);
     if(!window){CloseHandle(singleton);return 3;}
+    multiMode=true;initializeDevices();
+    DEV_BROADCAST_DEVICEINTERFACE_W filter{};filter.dbcc_size=sizeof(filter);filter.dbcc_devicetype=DBT_DEVTYP_DEVICEINTERFACE;
+    deviceNotification=RegisterDeviceNotificationW(window,&filter,DEVICE_NOTIFY_WINDOW_HANDLE|DEVICE_NOTIFY_ALL_INTERFACE_CLASSES);
     taskbarCreated=RegisterWindowMessageW(L"TaskbarCreated");
     updateIcon(true);SetTimer(window,1,60000,nullptr);refresh();
+    if(openDevices)showDevices();
     MSG msg;
-    while(GetMessageW(&msg,nullptr,0,0)>0){TranslateMessage(&msg);DispatchMessageW(&msg);}
+    while(GetMessageW(&msg,nullptr,0,0)>0){if(devicesWindow && IsDialogMessageW(devicesWindow,&msg))continue;TranslateMessage(&msg);DispatchMessageW(&msg);}
     UnregisterClassW(wc.lpszClassName,instance);
     if(appIcon)DestroyIcon(appIcon);
     ob::unloadNumberFont();

@@ -2,6 +2,10 @@
 
 Status: pełna specyfikacja zatwierdzona przez użytkownika 2026-11-22. Użytkownik polecił rozpocząć implementację 2026-11-22; prace rozpoczęto od weryfikacji protokołu.
 
+## Rozszerzenie 2026-11-25 — pierwszeństwo nowszych wymagań
+
+Użytkownik zatwierdził obsługę wielu urządzeń, Devices, niezależne ustawienia i ostrzeżenia oraz ostatecznie wybrał procenty w kolorowych okręgach, z indywidualnym kolorem ustawianym w Devices (zastępuje wcześniejsze A/C). Przybliżenie tylko w dymku/szczegółach. Cel lekkości zachowany: do 10 MB pamięci prywatnej i <0,1% jednego rdzenia w pomiarze 10-minutowym dla trzech urządzeń. Szczegóły zastępujące wcześniejszy zakres jednej myszy: [multi-device.md](multi-device.md). Zezwolono na implementację i lokalną instalację. Dodatkowo użytkownik jawnie zatwierdził pełne raporty Bluetooth dla swojego DualShock 4. Historyczne ustalenia pierwszej wersji poniżej.
+
 ## Cel i zakres
 
 Minimalny wskaźnik baterii AJAZZ AJ179 Pro przez odbiornik 2.4 GHz `3151:402D` dla Windows 11 x64. Pierwsza wersja obsługuje ten egzemplarz; odczyt baterii pozostaje niezweryfikowany. Interfejs programu i instalatora wyłącznie po angielsku. Dokumentacja robocza po polsku. Licencja MIT.

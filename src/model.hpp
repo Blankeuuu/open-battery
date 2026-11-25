@@ -5,12 +5,13 @@
 namespace ob {
 enum class BatteryBand { low, medium, high };
 inline BatteryBand batteryBand(int percent){return percent>=70?BatteryBand::high:percent>=30?BatteryBand::medium:BatteryBand::low;}
-enum class State { reading, inactive, disconnected, error };
+enum class State { reading, inactive, disconnected, error, unsupported };
 struct Reading {
     State state = State::error;
     int percent = -1;
     bool charging = false; // Unknown for AJ179 Pro; never inferred from percentage.
     unsigned long error = 0;
+    bool approximate = false, chargingKnown = false;
 };
 // Windows HID adds an ID byte to this unnumbered 64-byte feature report.
 // The status fields, not an arbitrary in-range byte, identify a valid reply.

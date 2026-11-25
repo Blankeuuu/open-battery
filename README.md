@@ -1,6 +1,12 @@
 # Open Battery
 
-Lekki, natywny wskaźnik baterii AJAZZ AJ179 Pro dla Windows 11 x64. Interfejs po angielsku, dokumentacja po polsku. Licencja [MIT](LICENSE).
+Lekki, natywny wskaźnik baterii urządzeń dla Windows 11 x64. Interfejs po angielsku, dokumentacja po polsku. Licencja [MIT](LICENSE).
+
+## Wiele urządzeń — 0.2.2
+
+Jedno miejsce na urządzenie: procent w kolorowym okręgu. Kolor okręgu wybierasz w Devices, a kolor cyfr nadal pokazuje poziom baterii. Devices pozwala wybrać urządzenia, własne nazwy, numery i ostrzeżenia. Nowe urządzenia są domyślnie wyłączone. Obsługa AJ179, właściwości baterii klasycznego Bluetooth (w tym JBL) oraz raportów DualShock 4/DualSense (DS4: opcjonalne pełne raporty BT po zgodzie użytkownika); dostępność danych zależy od urządzenia i trybu raportów. Szczegóły i ograniczenia: [docs/multi-device.md](docs/multi-device.md).
+
+Lewy klik otwiera Devices, prawy — menu. Okno można też otworzyć przez `OpenBattery.exe --devices`.
 
 ## Działanie
 
@@ -13,7 +19,7 @@ Lekki, natywny wskaźnik baterii AJAZZ AJ179 Pro dla Windows 11 x64. Interfejs p
 
 ## Instalacja
 
-Uruchom lokalnie zbudowany `build/OpenBattery-0.1.3-x64.msi`, następnie Open Battery z menu Start. Instalacja dla bieżącego użytkownika. Ikona może trafić pod strzałkę ukrytych ikon Windows.
+Uruchom lokalnie zbudowany `build/OpenBattery-0.2.2-x64.msi`, następnie Open Battery z menu Start. Instalacja dla bieżącego użytkownika. Ikona może trafić pod strzałkę ukrytych ikon Windows.
 
 Aktualizacja nowszym MSI zachowuje ustawienia. Odinstalowanie przez Windows usuwa ustawienia, autostart i logi programu. MSI nie jest obecnie podpisane ani opublikowane jako release.
 

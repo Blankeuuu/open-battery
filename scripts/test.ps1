@@ -12,12 +12,20 @@ try {
     if ($LASTEXITCODE) { throw 'Model compilation failed.' }
     & '.\build\model-tests.exe'
     if ($LASTEXITCODE) { throw 'Model tests failed.' }
-    & $zig c++ tests/integration-tests.cpp build/icons.obj -O2 -std=c++20 -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -o build/integration-tests.exe
+    & $zig c++ tests/device-tests.cpp -O2 -std=c++20 -o build/device-tests.exe
+    if ($LASTEXITCODE) { throw 'Device contract compilation failed.' }
+    & '.\build\device-tests.exe'
+    if ($LASTEXITCODE) { throw 'Device contracts failed.' }
+    & $zig c++ tests/integration-tests.cpp build/icons.obj -O2 -std=c++20 -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -lbthprops -lcfgmgr32 -lcomdlg32 -o build/integration-tests.exe
     if ($LASTEXITCODE) { throw 'Integration compilation failed.' }
-    & $zig c++ tests/wake-regression.cpp build/icons.obj -O2 -std=c++20 -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -o build/wake-regression.exe
+    & $zig c++ tests/wake-regression.cpp build/icons.obj -O2 -std=c++20 -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -lbthprops -lcfgmgr32 -lcomdlg32 -o build/wake-regression.exe
     if ($LASTEXITCODE) { throw 'Wake regression compilation failed.' }
     & '.\build\wake-regression.exe'
     if ($LASTEXITCODE) { throw 'Wake regression failed.' }
+    & $zig c++ tests/multi-tests.cpp build/icons.obj -O2 -std=c++20 -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -lbthprops -lcfgmgr32 -lcomdlg32 -o build/multi-tests.exe
+    if ($LASTEXITCODE) { throw 'Multi-device integration compilation failed.' }
+    & '.\build\multi-tests.exe'
+    if ($LASTEXITCODE) { throw 'Multi-device integration failed.' }
     & '.\build\integration-tests.exe'
     if ($LASTEXITCODE) { throw 'Integration tests failed.' }
 } finally { Pop-Location }
