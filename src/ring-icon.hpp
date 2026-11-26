@@ -2,14 +2,14 @@
 #include "number-icon.hpp"
 #include "devices.hpp"
 namespace ob {
-inline HICON ringIcon(const Device& device,int size,bool dark){
+inline HICON ringIcon(const Device& device,int size,bool dark,bool dimRing=false){
     size=std::max(16,size);const int scale=4,w=size*scale;
     std::vector<DWORD> pixels(w*w,0);
     auto ink=[](COLORREF c,unsigned a){return DWORD((a<<24)|((GetRValue(c)*a/255)<<16)|((GetGValue(c)*a/255)<<8)|(GetBValue(c)*a/255));};
     COLORREF ring=COLORREF(device.identityColor());
-    double center=(w-1)/2.0,outer=w/2.0-.25,inner=outer-std::max(4.,w/16.0);
+    double center=(w-1)/2.0,outer=w/2.0-.25,inner=outer-std::max(5.,w*1.25/16.0);
     for(int y=0;y<w;++y)for(int x=0;x<w;++x){double dx=x-center,dy=y-center,distance=std::sqrt(dx*dx+dy*dy);
-        if(distance<=outer && distance>=inner)pixels[y*w+x]=ink(ring,255);
+        if(distance<=outer && distance>=inner)pixels[y*w+x]=ink(ring,dimRing?72:255);
     }
     std::wstring text;
     switch(device.reading.state){case State::reading:text=std::to_wstring(device.reading.percent);break;
@@ -22,7 +22,7 @@ inline HICON ringIcon(const Device& device,int size,bool dark){
         std::vector<DWORD> source(w*w);GetDIBits(dc,ii.hbmColor,0,w,source.data(),&bi,DIB_RGB_COLORS);
         int left=w,top=w,right=0,bottom=0;for(int y=0;y<w;++y)for(int x=0;x<w;++x)if(source[y*w+x]>>24){left=std::min(left,x);right=std::max(right,x+1);top=std::min(top,y);bottom=std::max(bottom,y+1);}
         if(right>left && bottom>top){
-            int height=std::max(1,w*9/16),maxWidth=w*12/16;
+            int height=std::max(1,w*10/16),maxWidth=w*13/16;
             int width=std::max(1,std::min(maxWidth,(right-left)*height/(bottom-top)));
             int x0=(w-width)/2,y0=(w-height)/2;
             for(int y=0;y<height;++y)for(int x=0;x<width;++x){int sx=left+x*(right-left)/width,sy=top+y*(bottom-top)/height;unsigned a=source[sy*w+sx]>>24;

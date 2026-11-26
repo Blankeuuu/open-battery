@@ -6,6 +6,10 @@ Status: pełna specyfikacja zatwierdzona przez użytkownika 2026-11-22. Użytkow
 
 Użytkownik zatwierdził obsługę wielu urządzeń, Devices, niezależne ustawienia i ostrzeżenia oraz ostatecznie wybrał procenty w kolorowych okręgach, z indywidualnym kolorem ustawianym w Devices (zastępuje wcześniejsze A/C). Przybliżenie tylko w dymku/szczegółach. Cel lekkości zachowany: do 10 MB pamięci prywatnej i <0,1% jednego rdzenia w pomiarze 10-minutowym dla trzech urządzeń. Szczegóły zastępujące wcześniejszy zakres jednej myszy: [multi-device.md](multi-device.md). Zezwolono na implementację i lokalną instalację. Dodatkowo użytkownik jawnie zatwierdził pełne raporty Bluetooth dla swojego DualShock 4. Historyczne ustalenia pierwszej wersji poniżej.
 
+## Korekta ostrzeżeń — 2026-11-26
+
+Użytkownik zrezygnował z powiadomień Windows: przy ≤20% miga wyłącznie kolorowy okrąg. Cyfry pozostają widoczne. Efekt jest niezależny dla urządzeń, można go wyłączyć w Devices. Ta decyzja zastępuje wcześniejsze zasady jednego powiadomienia i ponownego uzbrojenia przy >25%; szczegóły w multi-device.md.
+
 ## Cel i zakres
 
 Minimalny wskaźnik baterii AJAZZ AJ179 Pro przez odbiornik 2.4 GHz `3151:402D` dla Windows 11 x64. Pierwsza wersja obsługuje ten egzemplarz; odczyt baterii pozostaje niezweryfikowany. Interfejs programu i instalatora wyłącznie po angielsku. Dokumentacja robocza po polsku. Licencja MIT.

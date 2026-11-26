@@ -1,4 +1,4 @@
-param([string]$Version = '0.2.2', [switch]$SkipMsi)
+param([string]$Version = '0.2.4', [switch]$SkipMsi)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 Push-Location $root

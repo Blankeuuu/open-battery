@@ -6,7 +6,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const require=createRequire(path.join(root,'.tools/icon-tools/package.json'));
 const {Resvg}=require('@resvg/resvg-js');
 const {PNG}=require('pngjs');
-const version=process.argv[2]??'0.2.2';
+const version=process.argv[2]??'0.2.4';
 if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('Expected major.minor.patch version');
 const output=path.join(root,'build/icons');
 fs.mkdirSync(output,{recursive:true});

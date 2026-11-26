@@ -3,11 +3,12 @@
 constexpr UINT devicesId=106;
 constexpr int listId=201,enabledId=202,notifyId=203,nameId=204,badgeId=205,saveId=206,forgetId=207,refreshDeviceId=208,extendedId=209,colorId=210;
 bool auxPending=false,refreshQueued=false;
+bool blinkTimerActive=false,blinkDim=false;
 std::vector<ob::Device> devices,auxResult;
 std::vector<std::wstring> pollSelected,pollExtended;
 bool pollAux=true,pollAj=true;
 std::wstring requestedDevice;
-struct TrayEntry {std::wstring id;UINT number;HICON icon=nullptr;std::wstring signature;bool numeric=false;};
+struct TrayEntry {std::wstring id;UINT number;HICON icon=nullptr;std::wstring signature;bool numeric=false;HICON dimIcon=nullptr;};
 std::vector<TrayEntry> trays;
 UINT nextTray=2;
 HWND devicesWindow=nullptr,deviceList=nullptr,detailsLabel=nullptr,nameEdit=nullptr,badgeEdit=nullptr,enabledCheck=nullptr,notifyCheck=nullptr,extendedCheck=nullptr,colorButton=nullptr;
@@ -38,12 +39,23 @@ std::wstring deviceDescription(const ob::Device& d){
     return s;
 }
 NOTIFYICONDATAW deviceTrayData(UINT number){auto data=trayData();data.uID=number;return data;}
-void removeTray(TrayEntry& t){auto d=deviceTrayData(t.number);Shell_NotifyIconW(NIM_DELETE,&d);if(t.icon)DestroyIcon(t.icon);t.icon=nullptr;}
+void removeTray(TrayEntry& t){auto d=deviceTrayData(t.number);Shell_NotifyIconW(NIM_DELETE,&d);if(t.icon)DestroyIcon(t.icon);if(t.dimIcon)DestroyIcon(t.dimIcon);t.icon=nullptr;t.dimIcon=nullptr;}
+void syncBlinkTimer(){
+    bool needed=false;for(const auto& d:devices)needed|=d.shouldBlink();
+    if(needed && !blinkTimerActive){blinkDim=false;blinkTimerActive=SetTimer(window,5,1000,nullptr)!=0;}
+    else if(!needed){if(blinkTimerActive)KillTimer(window,5);blinkTimerActive=false;blinkDim=false;}
+}
+void updateBlinkFrames(){
+    for(const auto& t:trays){auto device=getDevice(t.id);if(!device || !device->shouldBlink() || !t.dimIcon)continue;
+        auto data=deviceTrayData(t.number);data.uFlags=NIF_ICON;data.hIcon=blinkDim?t.dimIcon:t.icon;Shell_NotifyIconW(NIM_MODIFY,&data);
+    }
+}
 void updateAllIcons(bool add){
     if(!multiMode)return;
     auto aj=getDevice(L"aj179");if(aj)aj->reading=current;
     std::vector<std::wstring> visible;for(const auto& d:devices)if(d.enabled)visible.push_back(d.id);
     if(visible.empty())visible.push_back(L"app");
+    syncBlinkTimer();
     for(auto it=trays.begin();it!=trays.end();){
         if(std::find(visible.begin(),visible.end(),it->id)==visible.end() || it->numeric){removeTray(*it);it=trays.erase(it);}else ++it;
     }
@@ -52,28 +64,17 @@ void updateAllIcons(bool add){
         bool create=it==trays.end();if(create){trays.push_back({id,nextTray++,nullptr,L"",false});it=trays.end()-1;}
         int size=std::max(16,GetSystemMetrics(SM_CXSMICON));const auto* device=getDevice(id);
         std::wstring signature=std::to_wstring(size)+L":"+std::to_wstring(darkTheme());
-        if(device)signature+=L":"+std::to_wstring(int(device->reading.state))+L":"+std::to_wstring(device->reading.percent)+L":"+std::to_wstring(device->identityColor())+L":"+std::to_wstring(device->reading.chargingKnown && device->reading.charging);
+        if(device)signature+=L":"+std::to_wstring(int(device->reading.state))+L":"+std::to_wstring(device->reading.percent)+L":"+std::to_wstring(device->identityColor())+L":"+std::to_wstring(device->shouldBlink())+L":"+std::to_wstring(device->reading.chargingKnown && device->reading.charging);
         bool redraw=!it->icon || signature!=it->signature;HICON next=it->icon;
-        if(redraw)next=device?ob::ringIcon(*device,size,darkTheme()):ob::loadArtwork(ob::Artwork::app,size,darkTheme());
+        HICON dim=it->dimIcon;
+        if(redraw){next=device?ob::ringIcon(*device,size,darkTheme()):ob::loadArtwork(ob::Artwork::app,size,darkTheme());dim=device && device->shouldBlink()?ob::ringIcon(*device,size,darkTheme(),true):nullptr;}
         if(!next)continue;
-        auto data=deviceTrayData(it->number);data.uFlags=NIF_ICON|NIF_TIP|NIF_MESSAGE|NIF_SHOWTIP;data.hIcon=next;data.uCallbackMessage=trayMessage;
+        auto data=deviceTrayData(it->number);data.uFlags=NIF_ICON|NIF_TIP|NIF_MESSAGE|NIF_SHOWTIP;data.hIcon=device && device->shouldBlink() && blinkDim && dim?dim:next;data.uCallbackMessage=trayMessage;
         std::wstring tip=device?deviceDescription(*device):L"Open Battery — click to choose devices";wcsncpy(data.szTip,tip.c_str(),127);data.szTip[127]=0;
         if(!Shell_NotifyIconW(create||add?NIM_ADD:NIM_MODIFY,&data) && !create && !add)Shell_NotifyIconW(NIM_ADD,&data);
         if(create||add){data.uVersion=NOTIFYICON_VERSION_4;Shell_NotifyIconW(NIM_SETVERSION,&data);}
-        if(redraw){if(it->icon)DestroyIcon(it->icon);it->icon=next;it->signature=signature;}
+        if(redraw){if(it->icon)DestroyIcon(it->icon);if(it->dimIcon)DestroyIcon(it->dimIcon);it->icon=next;it->dimIcon=dim;it->signature=signature;}
     }
-}
-void warningFor(ob::Device& device){
-    bool was=device.alert.warned;
-    if(device.reading.state==ob::State::reading && device.reading.percent>25)device.alert.warned=false;
-    bool warn=device.enabled && device.notifications && device.alert.observe(device.reading);
-    if(was!=device.alert.warned)ob::saveDevice(device);
-    if(!warn)return;
-    auto it=std::find_if(trays.begin(),trays.end(),[&](const TrayEntry& t){return t.id==device.id;});if(it==trays.end())return;
-    auto d=deviceTrayData(it->number);d.uFlags=NIF_INFO;d.dwInfoFlags=NIIF_WARNING|NIIF_RESPECT_QUIET_TIME;
-    wcscpy(d.szInfoTitle,L"Device battery low");
-    std::wstring body=device.name()+L" battery: "+(device.reading.approximate?L"approx. ":L"")+std::to_wstring(device.reading.percent)+L"%. Please charge your device.";
-    wcsncpy(d.szInfo,body.c_str(),255);d.szInfo[255]=0;Shell_NotifyIconW(NIM_MODIFY,&d);
 }
 void receiveOtherDevices(){
     if(!auxPending)return;
@@ -84,7 +85,7 @@ void receiveOtherDevices(){
     if(deviceList){SendMessageW(deviceList,LB_RESETCONTENT,0,0);
         for(const auto& d:devices)SendMessageW(deviceList,LB_ADDSTRING,0,reinterpret_cast<LPARAM>(d.name().c_str()));
         auto it=std::find_if(devices.begin(),devices.end(),[&](const ob::Device& d){return d.id==selected;});SendMessageW(deviceList,LB_SETCURSEL,it==devices.end()?0:it-devices.begin(),0);}
-    for(auto& d:devices){warningFor(d);if(d.id!=L"aj179"){auto key=ob::storageId(d.id);std::string label(key.begin(),key.end());logReading(d.reading,label.c_str());}}refreshDeviceWindow();
+    for(auto& d:devices){if(d.id!=L"aj179"){auto key=ob::storageId(d.id);std::string label(key.begin(),key.end());logReading(d.reading,label.c_str());}}refreshDeviceWindow();
 }
 void initializeDevices(){
     devices=ob::rememberedDevices();
@@ -107,7 +108,7 @@ void refreshDeviceWindow(){
         if(d->reading.error)detail+=L"\r\nError: "+std::to_wstring(d->reading.error);
         SetWindowTextW(detailsLabel,detail.c_str());if(GetFocus()!=nameEdit && GetFocus()!=badgeEdit){SetWindowTextW(nameEdit,d->alias.c_str());SetWindowTextW(badgeEdit,std::to_wstring(d->badge).c_str());}
         SendMessageW(extendedCheck,BM_SETCHECK,d->extendedReports?BST_CHECKED:BST_UNCHECKED,0);
-        SendMessageW(enabledCheck,BM_SETCHECK,d->enabled?BST_CHECKED:BST_UNCHECKED,0);SendMessageW(notifyCheck,BM_SETCHECK,d->notifications?BST_CHECKED:BST_UNCHECKED,0);
+        SendMessageW(enabledCheck,BM_SETCHECK,d->enabled?BST_CHECKED:BST_UNCHECKED,0);SendMessageW(notifyCheck,BM_SETCHECK,d->blinkLow?BST_CHECKED:BST_UNCHECKED,0);
     }else {SetWindowTextW(detailsLabel,L"No devices found. Connect a paired device and choose Refresh.");SetWindowTextW(nameEdit,L"");SetWindowTextW(badgeEdit,L"0");}
     fillingDevices=false;
 }
@@ -126,7 +127,7 @@ LRESULT CALLBACK deviceWindowProc(HWND h,UINT msg,WPARAM w,LPARAM l){
         deviceList=c(L"LISTBOX",L"",WS_TABSTOP|WS_BORDER|WS_VSCROLL|LBS_NOTIFY|LBS_NOINTEGRALHEIGHT,18,48,206,330,listId);
         detailsLabel=c(L"STATIC",L"",0,242,48,388,176);
         enabledCheck=c(L"BUTTON",L"Show in tray",WS_TABSTOP|BS_AUTOCHECKBOX,242,228,360,24,enabledId);
-        notifyCheck=c(L"BUTTON",L"Low battery notifications",WS_TABSTOP|BS_AUTOCHECKBOX,242,258,360,24,notifyId);
+        notifyCheck=c(L"BUTTON",L"Blink at 20% or less",WS_TABSTOP|BS_AUTOCHECKBOX,242,258,360,24,notifyId);
         extendedCheck=c(L"BUTTON",L"DualShock 4: enable full Bluetooth reports",WS_TABSTOP|BS_AUTOCHECKBOX,242,288,390,24,extendedId);
         c(L"STATIC",L"Custom name (blank = default)",0,242,324,270,20);nameEdit=c(L"EDIT",L"",WS_TABSTOP|ES_AUTOHSCROLL,242,348,250,26,nameId);SendMessageW(nameEdit,EM_SETLIMITTEXT,48,0);
         c(L"STATIC",L"Number (tooltip)",0,506,324,130,20);badgeEdit=c(L"EDIT",L"0",WS_TABSTOP|ES_NUMBER,506,348,110,26,badgeId);SendMessageW(badgeEdit,EM_SETLIMITTEXT,1,0);
@@ -145,7 +146,7 @@ LRESULT CALLBACK deviceWindowProc(HWND h,UINT msg,WPARAM w,LPARAM l){
         if(id==saveId || id==enabledId || id==notifyId || id==extendedId){
             if(fillingDevices)return 0;
             bool selected=SendMessageW(enabledCheck,BM_GETCHECK,0,0)==BST_CHECKED;
-            d->extendedReports=SendMessageW(extendedCheck,BM_GETCHECK,0,0)==BST_CHECKED;d->enabled=selected;d->notifications=SendMessageW(notifyCheck,BM_GETCHECK,0,0)==BST_CHECKED;
+            d->extendedReports=SendMessageW(extendedCheck,BM_GETCHECK,0,0)==BST_CHECKED;d->enabled=selected;d->blinkLow=SendMessageW(notifyCheck,BM_GETCHECK,0,0)==BST_CHECKED;
             if(id==saveId){wchar_t name[64]{},badge[4]{};GetWindowTextW(nameEdit,name,64);GetWindowTextW(badgeEdit,badge,4);d->alias=name;d->badge=std::min(unsigned(wcstoul(badge,nullptr,10)),9u);}
             d->configured=true;ob::saveDevice(*d);std::wstring chosen=d->id;
             auto index=SendMessageW(deviceList,LB_GETCURSEL,0,0);SendMessageW(deviceList,LB_DELETESTRING,index,0);SendMessageW(deviceList,LB_INSERTSTRING,index,reinterpret_cast<LPARAM>(d->name().c_str()));SendMessageW(deviceList,LB_SETCURSEL,index,0);

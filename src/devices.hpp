@@ -15,6 +15,8 @@ struct Device {
     bool lastApproximate=false;
     std::uint64_t lastRead=0;
     bool enabled=false, notifications=true, configured=false, extendedReports=false;
+    bool blinkLow=true;
+    bool shouldBlink() const {return enabled && blinkLow && reading.state==State::reading && reading.percent>=0 && reading.percent<=20 && !(reading.chargingKnown && reading.charging);}
     unsigned badge=0;
     std::uint32_t ringColor=0;bool customRingColor=false;
     std::uint32_t identityColor() const {if(customRingColor)return ringColor;return kind==DeviceKind::mouse?0x005e56f4u:kind==DeviceKind::controller?0x00ff82b1u:kind==DeviceKind::headphones?0x00d2c643u:0x0046b7efu;}

@@ -3,6 +3,7 @@
 #include "../src/main.cpp"
 #undef wWinMain
 #include <cstdlib>
+#include <psapi.h>
 void requireMulti(bool ok,const char* name){if(!ok){printf("FAIL: %s\n",name);exit(1);}}
 void captureFixture(HWND h){
     RECT bounds;GetClientRect(h,&bounds);int width=bounds.right,height=bounds.bottom;
@@ -40,13 +41,25 @@ int main(int argc,char**){
     wchar_t detail[1024]{};GetWindowTextW(detailsLabel,detail,1024);requireMulti(std::wstring(detail).find(L"Approx.")!=std::wstring::npos && std::wstring(detail).find(L"Charging")!=std::wstring::npos,"approximation and charging in details");
     SetWindowTextW(nameEdit,L"Living room pad");SetWindowTextW(badgeEdit,L"3");SendMessageW(devicesWindow,WM_COMMAND,saveId,0);
     requireMulti(devices[1].alias==L"Living room pad" && devices[1].badge==3,"save name and number updates correct device");
-    SendMessageW(notifyCheck,BM_SETCHECK,BST_CHECKED,0);SendMessageW(devicesWindow,WM_COMMAND,notifyId,0);requireMulti(devices[1].notifications,"notification checkbox targets one device");
+    SendMessageW(notifyCheck,BM_SETCHECK,BST_CHECKED,0);SendMessageW(devicesWindow,WM_COMMAND,notifyId,0);requireMulti(devices[1].blinkLow,"blink checkbox targets one device");
     SendMessageW(enabledCheck,BM_SETCHECK,BST_UNCHECKED,0);SendMessageW(devicesWindow,WM_COMMAND,enabledId,0);requireMulti(!devices[1].enabled && trays.size()==2,"disable hides only the selected device ring");
     devices[1].enabled=true;updateAllIcons();refreshDeviceWindow();
     ob::Device test=mouse;HICON warm=ob::deviceIcon(test,16,true);DestroyIcon(warm);
     DWORD before=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS);
     for(int i=0;i<1000;++i){test.kind=ob::DeviceKind(i%3);test.reading.state=ob::State(i%5);test.badge=i%4;HICON icon=ob::ringIcon(test,16+(i%3)*4,i%2);requireMulti(icon!=nullptr,"A device icon creation");DestroyIcon(icon);}
     DWORD after=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS);requireMulti(after<=before+2,"new A renderer has stable GDI handles");
+        DestroyWindow(devicesWindow);
+    for(int i=0;i<10;++i){showDevices(pad.id);DestroyWindow(devicesWindow);}
+    PROCESS_MEMORY_COUNTERS_EX memoryBefore{};memoryBefore.cb=sizeof(memoryBefore);
+    GetProcessMemoryInfo(GetCurrentProcess(),reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memoryBefore),sizeof(memoryBefore));
+    DWORD uiGdiBefore=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS),uiHandlesBefore=0;GetProcessHandleCount(GetCurrentProcess(),&uiHandlesBefore);
+    for(int i=0;i<100;++i){showDevices(pad.id);DestroyWindow(devicesWindow);}
+    PROCESS_MEMORY_COUNTERS_EX memoryAfter{};memoryAfter.cb=sizeof(memoryAfter);
+    GetProcessMemoryInfo(GetCurrentProcess(),reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memoryAfter),sizeof(memoryAfter));
+    DWORD uiGdiAfter=GetGuiResources(GetCurrentProcess(),GR_GDIOBJECTS),uiHandlesAfter=0;GetProcessHandleCount(GetCurrentProcess(),&uiHandlesAfter);
+    requireMulti(uiGdiAfter<=uiGdiBefore+2 && uiHandlesAfter<=uiHandlesBefore+2,"100 Devices open/close cycles release fonts and handles");
+    requireMulti(memoryAfter.PrivateUsage<=memoryBefore.PrivateUsage+1000000,"100 Devices cycles have bounded private memory after warmup");
+    printf("PASS: 100 Devices cycles private=%zu -> %zu GDI=%lu -> %lu handles=%lu -> %lu\n",memoryBefore.PrivateUsage,memoryAfter.PrivateUsage,uiGdiBefore,uiGdiAfter,uiHandlesBefore,uiHandlesAfter);
     printf("PASS: settings reload/forget, one colored ring per device, fallback, Explorer rebuild, Devices selection/editing/toggles, 1000 ring icons GDI %lu -> %lu\n",before,after);
     if(argc>1){ULONGLONG end=GetTickCount64()+45000;while(devicesWindow && GetTickCount64()<end){messages();Sleep(10);}}
     DestroyWindow(window);RegDeleteTreeW(HKEY_CURRENT_USER,ob::deviceSettingsRoot.c_str());ob::unloadNumberFont();

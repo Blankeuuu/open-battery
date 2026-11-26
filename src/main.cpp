@@ -184,12 +184,6 @@ void updateIcon(bool add=false){
     if(add){d.uVersion=NOTIFYICON_VERSION_4;Shell_NotifyIconW(NIM_SETVERSION,&d);}
     if(icon)DestroyIcon(icon);icon=next;
 }
-void showWarning(){
-    auto d=trayData();d.uFlags=NIF_INFO;d.dwInfoFlags=NIIF_WARNING|NIIF_RESPECT_QUIET_TIME;
-    wcscpy(d.szInfoTitle,L"Mouse battery low");
-    swprintf(d.szInfo,256,L"AJ179 Pro battery: %d%%. Please charge your mouse.",current.percent);
-    Shell_NotifyIconW(NIM_MODIFY,&d);
-}
 #include "multi-app.hpp"
 ob::Reading pollPrevious;
 ob::Reading (*queryBattery)()=ob::query;
@@ -290,6 +284,7 @@ LRESULT CALLBACK wndProc(HWND h,UINT msg,WPARAM w,LPARAM l){
         else if(w==2){KillTimer(h,2);if(multiMode)requestedDevice=L"aj179";refresh();}
         else if(w==3){KillTimer(h,3);monitorWake();}
         else if(w==4){KillTimer(h,4);refresh();}
+        else if(w==5 && blinkTimerActive){blinkDim=!blinkDim;updateBlinkFrames();}
         return 0;
     case WM_INPUT:
         if(wakeInput.accepts(reinterpret_cast<HRAWINPUT>(l))){
@@ -304,15 +299,12 @@ LRESULT CALLBACK wndProc(HWND h,UINT msg,WPARAM w,LPARAM l){
         auto r=reinterpret_cast<ob::Reading*>(l);if(!multiMode || pollAj)current=*r;delete r;
         if(worker){WaitForSingleObject(worker,INFINITE);CloseHandle(worker);worker=nullptr;}
         if((!multiMode || pollAj) && current.state==ob::State::reading){lastPercent=current.percent;GetLocalTime(&lastTime);}
-        bool before=alert.warned;bool warn=!multiMode && alert.observe(current);
-        if(before!=alert.warned)writeSetting(L"Warned",alert.warned);
         if(multiMode){
             if(auto aj=getDevice(L"aj179");aj && pollAj){aj->observe(current,fileTimeNow());}
             receiveOtherDevices();updateAllIcons();
-            if(auto aj=getDevice(L"aj179");aj && pollAj)warningFor(*aj);
             refreshDeviceWindow();
         }
-        if(!multiMode || pollAj)logReading(current);if(!multiMode)updateIcon();updateWakeAfterReading();if(warn && !multiMode)showWarning();
+        if(!multiMode || pollAj)logReading(current);if(!multiMode)updateIcon();updateWakeAfterReading();
         if(multiMode && refreshQueued){refreshQueued=false;refresh();}return 0;
     }
     case trayMessage:{
@@ -326,7 +318,7 @@ LRESULT CALLBACK wndProc(HWND h,UINT msg,WPARAM w,LPARAM l){
     case WM_APP+4:showDevices();return 0;
     case WM_CLOSE:DestroyWindow(h);return 0;
     case WM_DESTROY:{
-        KillTimer(h,1);KillTimer(h,2);KillTimer(h,3);KillTimer(h,4);wakeInput.stop();
+        KillTimer(h,1);KillTimer(h,2);KillTimer(h,3);KillTimer(h,4);KillTimer(h,5);blinkTimerActive=false;blinkDim=false;wakeInput.stop();
         if(deviceNotification){UnregisterDeviceNotification(deviceNotification);deviceNotification=nullptr;}
         auto d=trayData();Shell_NotifyIconW(NIM_DELETE,&d);
         if(multiMode){if(devicesWindow)DestroyWindow(devicesWindow);for(auto& t:trays)removeTray(t);trays.clear();}

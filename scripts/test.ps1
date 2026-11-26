@@ -22,10 +22,14 @@ try {
     if ($LASTEXITCODE) { throw 'Wake regression compilation failed.' }
     & '.\build\wake-regression.exe'
     if ($LASTEXITCODE) { throw 'Wake regression failed.' }
-    & $zig c++ tests/multi-tests.cpp build/icons.obj -O2 -std=c++20 -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -lbthprops -lcfgmgr32 -lcomdlg32 -o build/multi-tests.exe
+    & $zig c++ tests/multi-tests.cpp build/icons.obj -O2 -std=c++20 -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -lbthprops -lcfgmgr32 -lcomdlg32 -lpsapi -o build/multi-tests.exe
     if ($LASTEXITCODE) { throw 'Multi-device integration compilation failed.' }
     & '.\build\multi-tests.exe'
     if ($LASTEXITCODE) { throw 'Multi-device integration failed.' }
+    & $zig c++ tests/blink-regression.cpp build/icons.obj -O2 -std=c++20 -lhid -lsetupapi -lshell32 -lole32 -ladvapi32 -lgdi32 -luser32 -luuid -lbthprops -lcfgmgr32 -lcomdlg32 -o build/blink-regression.exe
+    if ($LASTEXITCODE) { throw 'Blink regression compilation failed.' }
+    & '.\build\blink-regression.exe'
+    if ($LASTEXITCODE) { throw 'Blink regression failed.' }
     & '.\build\integration-tests.exe'
     if ($LASTEXITCODE) { throw 'Integration tests failed.' }
 } finally { Pop-Location }

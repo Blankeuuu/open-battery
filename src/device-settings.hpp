@@ -19,7 +19,7 @@ inline void saveDevice(const Device& d){
     HKEY key=nullptr;if(RegCreateKeyExW(HKEY_CURRENT_USER,deviceKey(d.id).c_str(),0,nullptr,0,KEY_SET_VALUE,nullptr,&key,nullptr)!=ERROR_SUCCESS)return;
     textSetting(key,L"Id",d.id);textSetting(key,L"Name",d.defaultName);textSetting(key,L"Alias",d.alias);
     numberSetting(key,L"Kind",DWORD(d.kind));numberSetting(key,L"Enabled",d.enabled);numberSetting(key,L"Notifications",d.notifications);
-    numberSetting(key,L"RingColor",d.identityColor());numberSetting(key,L"ExtendedReports",d.extendedReports);numberSetting(key,L"Badge",d.badge);numberSetting(key,L"Warned",d.alert.warned);RegCloseKey(key);
+    numberSetting(key,L"BlinkLow",d.blinkLow);numberSetting(key,L"RingColor",d.identityColor());numberSetting(key,L"ExtendedReports",d.extendedReports);numberSetting(key,L"Badge",d.badge);numberSetting(key,L"Warned",d.alert.warned);RegCloseKey(key);
 }
 inline void loadDevice(Device& d){
     HKEY key=nullptr;if(RegOpenKeyExW(HKEY_CURRENT_USER,deviceKey(d.id).c_str(),0,KEY_QUERY_VALUE,&key)!=ERROR_SUCCESS)return;
@@ -27,7 +27,7 @@ inline void loadDevice(Device& d){
     if(settingText(key,L"Id")!=d.id){RegCloseKey(key);return;}
     d.alias=settingText(key,L"Alias");d.enabled=settingNumber(key,L"Enabled",0)!=0;
     DWORD ring=settingNumber(key,L"RingColor",0xffffffffu);if(ring<=0xffffffu){d.ringColor=ring;d.customRingColor=true;}
-    d.extendedReports=settingNumber(key,L"ExtendedReports",0)!=0;d.notifications=settingNumber(key,L"Notifications",1)!=0;d.alert.warned=settingNumber(key,L"Warned",0)!=0;
+    d.blinkLow=settingNumber(key,L"BlinkLow",1)!=0;d.extendedReports=settingNumber(key,L"ExtendedReports",0)!=0;d.notifications=settingNumber(key,L"Notifications",1)!=0;d.alert.warned=settingNumber(key,L"Warned",0)!=0;
     d.badge=std::min(settingNumber(key,L"Badge",0),DWORD(9));d.configured=true;RegCloseKey(key);
 }
 inline std::vector<Device> rememberedDevices(){
@@ -42,6 +42,6 @@ inline std::vector<Device> rememberedDevices(){
 }
 inline void forgetDevice(Device& d){
     RegDeleteTreeW(HKEY_CURRENT_USER,deviceKey(d.id).c_str());
-    d.customRingColor=false;d.ringColor=0;d.extendedReports=false;d.enabled=false;d.notifications=true;d.alias.clear();d.badge=0;d.alert={};d.configured=false;d.lastRead=0;d.lastPercent=-1;
+    d.blinkLow=true;d.customRingColor=false;d.ringColor=0;d.extendedReports=false;d.enabled=false;d.notifications=true;d.alias.clear();d.badge=0;d.alert={};d.configured=false;d.lastRead=0;d.lastPercent=-1;
 }
 }

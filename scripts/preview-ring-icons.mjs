@@ -10,7 +10,7 @@ function png(file){const b=fs.readFileSync(file),size=b.readInt32LE(18),offset=b
 function encoded(p,zoom=1){if(zoom===1)return PNG.sync.write(p).toString('base64');const z=new PNG({width:p.width*zoom,height:p.height*zoom});for(let y=0;y<z.height;y++)for(let x=0;x<z.width;x++){const q=(Math.floor(y/zoom)*p.width+Math.floor(x/zoom))*4;p.data.copy(z.data,(y*z.width+x)*4,q,q+4);}return PNG.sync.write(z).toString('base64');}
 for(const theme of ['dark','light']){
  const bg=theme==='dark'?'#25282c':'#f0f0f0',fg=theme==='dark'?'#eeeeee':'#202124';
- let s=`<svg xmlns="http://www.w3.org/2000/svg" width="760" height="460"><rect width="760" height="460" fill="${bg}"/><g font-family="Segoe UI" fill="${fg}"><text x="24" y="34" font-size="20">Open Battery 0.2.2 · kolor urządzenia w okręgu</text><text x="24" y="60" font-size="13">Win32/GDI · jeden wskaźnik na urządzenie · wartości przykładowe</text>`;
+ let s=`<svg xmlns="http://www.w3.org/2000/svg" width="760" height="460"><rect width="760" height="460" fill="${bg}"/><g font-family="Segoe UI" fill="${fg}"><text x="24" y="34" font-size="20">Open Battery 0.2.4 · kolor urządzenia w okręgu</text><text x="24" y="60" font-size="13">Win32/GDI · jeden wskaźnik na urządzenie · wartości przykładowe</text>`;
  for(const [row,size] of [16,20,24,32].entries()){
   const y=96+row*54;s+=`<text x="24" y="${y+15}" font-size="13">${size} px</text>`;
   for(let k=0;k<3;k++)for(const [part,role] of ['symbol'].entries()){
